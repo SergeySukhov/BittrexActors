@@ -47,7 +47,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActorModels\Account.cs" />
     <Compile Include="ActorModels\Actor.cs" />
+    <Compile Include="ActorModels\DayBounds.cs" />
+    <Compile Include="ActorModels\Observation.cs" />
+    <Compile Include="ActorModels\Prediction.cs" />
     <Compile Include="ActorModels\Rule.cs" />
     <Compile Include="ActorModels\Transaction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

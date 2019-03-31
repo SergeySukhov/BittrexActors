@@ -16,7 +16,7 @@ namespace BittrexCore
 
             var actor = new Actor("BTC-LTC", new TimeSpan(0, 0, 1));
             
-            var rule = new Rule(new TimeSpan(0, 59, 0));
+            var rule = new Rule(RuleType.ForBuy);
             rule.Conditions.Add(x => { return 0; });
 
             actor.Rules.Add(rule);

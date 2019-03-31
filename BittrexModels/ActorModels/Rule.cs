@@ -8,22 +8,28 @@ namespace BittrexModels.ActorModels
 {
     public delegate int Condition(Observation[] observations);
 
+    public enum RuleType
+    {
+        ForBuy,
+        ForSell
+    }
+
     public class Rule
     {
         
         public List<Condition> Conditions { get; }
         public double Rating = 1;
         public TimeSpan TickAim;
+        public RuleType Type;
 
        
-        public Rule(TimeSpan tickAim)
+        public Rule(RuleType ruleType)
         {
-            TickAim = tickAim;
+            this .Type = ruleType;
             Conditions = new List<Condition>();
         }
-        public double RuleRecomendation(Observation[] observations, TimeSpan timeSpan)
-        {
-            if (timeSpan < TickAim) return 0;
+        public double RuleRecomendation(Observation[] observations)
+        {            
             return Conditions.Sum(x => x(observations))*Rating;
         }
     }
