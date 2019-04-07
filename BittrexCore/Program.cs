@@ -34,8 +34,7 @@ namespace BittrexCore
         private static void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             
-            Console.WriteLine("1");
-            //throw new NotImplementedException();
+            Console.WriteLine("1");           
         }
 
 

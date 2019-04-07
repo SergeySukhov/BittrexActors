@@ -105,18 +105,7 @@ namespace BittrexModels.ActorModels
             if (persuasiveness > HesitationToBuy)
                Transaction.CreateTransaction(OperationType.Buy, this,
                     CountVolume.BtcCount * (decimal)(OperationPercent * (persuasiveness - HesitationToBuy)));
-
-
         }
-
-        public void ChangeCount(Transaction transaction, decimal sum)
-        {
-            if (transaction.Type == OperationType.Buy && this.CountVolume.BtcCount - sum >= 0)
-                this.CountVolume.BtcCount -= sum;
-            else if (this.CountVolume.BtcCount - sum < 0) throw new Exception("not enough money");
-            else this.CountVolume.BtcCount += sum;
-        }
-
     }
 
      

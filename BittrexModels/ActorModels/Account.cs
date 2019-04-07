@@ -8,24 +8,26 @@ namespace BittrexModels.ActorModels
 {
     public class Account
     {
+        private decimal btcCount = 0, targetCurrencyCount;
+
         public string TargetCurrencyName { get; set; }
+
         public decimal BtcCount
         {
-            get { return BtcCount; }
-            set
+            get => btcCount; set
             {
-                if (BtcCount < 0) throw new Exception("negative btc count");
-                BtcCount = value;
+                if (value < 0) throw new Exception("Невозможно установить отрицательный баланс!");
+                btcCount = value;
             }
         }
         public decimal TargetCurrencyCount
         {
-            get { return TargetCurrencyCount; }
-            set
+            get => targetCurrencyCount; set
             {
-                if (TargetCurrencyCount < 0) throw new Exception($"negative {TargetCurrencyName} count");
-                BtcCount = value;
+                if (value < 0) throw new Exception("Невозможно установить отрицательный баланс!");
+                targetCurrencyCount = value;
             }
         }
+        
     }
 }
