@@ -28,9 +28,9 @@ namespace BittrexModels.ActorModels
 
         /// <summary>
         /// Обработка очередной транзакции
-        /// todo: добавить параллельность для разных актеров и проверку на 200 транзакций в минуту
+        /// todo: добавить параллельность для разных актеров и проверку на 60 транзакций в минуту
         /// </summary>
-        public async static void ProcessTransactions()
+        private async static void ProcessTransactions()
         {
             if (AwaitingTransactions.Count == 0) return;
 
@@ -100,7 +100,7 @@ namespace BittrexModels.ActorModels
 
         private Transaction(OperationType operationType, Actor actor, decimal sum)
         {
-            AllTransactions.Add(actor.Id.ToString(), this);
+            AllTransactions.Add(actor.Guid.ToString(), this);
             this.Type = operationType;
             if (Type == OperationType.Buy) this.BtcSum = sum;
             if (Type == OperationType.Sell) this.CurrencySum = sum;

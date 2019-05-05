@@ -5,47 +5,67 @@ using System.Text;
 using System.Threading.Tasks;
 using Bittrex.Api.Client.Models;
 using Bittrex.Api.Client;
+using BittrexCore.Models;
 
 namespace BittrexModels.ActorModels
 {
     public class Actor
     {
-        public Guid Id { get; }
-        public Account CountVolume { get; } // BTC
+        public static List<Actor> AllActors = new List<Actor>();
+
+        public Guid Guid { get; }
+        public Account CountVolume { get; } // BTC - Currency
         public string TargetMarket { get; }
+
         List<Transaction> RealisedTransactions { get; }
         List<Transaction> AwaitingTransactions { get; }
+
         public List<Rule> Rules { get; }
 
         public TimeSpan TickSpan { get; }
         public List<DayBounds> InactiveTime { get; }
+
         public List<Observation> Observations { get; }
         public List<Prediction> Predictions { get; }
 
         private double HesitationToBuy { get; set; }
         private double HesitationToSell { get; set; }
-        private double OperationPercent { get; set; }
 
-        public Actor(string targetMarket, TimeSpan tickSpan, decimal startCountVol = 0.5m)
+        private DateTime LastTick { get; set; }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="targetMarket"> целевой магазин (валюта в которой идет торговля)</param>
+        /// <param name="tickSpan">периодичность действий актора (сек.)</param>
+        /// <param name="startCountVol">начальные объем валюты (BTC)</param>
+        public Actor(string targetMarket, int tickSpan = 10, decimal startCountVol = 0.5m)
         {
-            Id = Guid.NewGuid();
+            Guid = Guid.NewGuid();
             CountVolume = new Account() { TargetCurrencyName = "", BtcCount = startCountVol, TargetCurrencyCount = 0m };
             TargetMarket = targetMarket;
-            TickSpan = tickSpan;
+            TickSpan = new TimeSpan(tickSpan* 10000000);
+            LastTick = DateTime.Now - TickSpan;
             Rules = new List<Rule>();
             InactiveTime = new List<DayBounds>();
             Observations = new List<Observation>();
 
-            HesitationToBuy = 1.0;
-            HesitationToSell = 1.0;
-            OperationPercent = 0.1;
-
+            HesitationToBuy = Consts.StartActorBuyHesitation;
+            HesitationToSell = Consts.StartActorSellHesitation;
+            AllActors.Add(this);
         }
 
+        /// <summary>
+        /// Переодически вызываемая функция актора для всех операций
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public async void ActorTimer(object sender, EventArgs e)
         {
-
-            if (InactiveTime.Any(x => x.isInBounds(DateTime.Now))) return;
+            // ассинхронность {}
+            if (InactiveTime.Any(x => x.isInBounds(DateTime.Now)) || DateTime.Now - this.LastTick < this.TickSpan) return;
+            LastTick = DateTime.Now;
             await Observe();
 
             if (Rules.Count == 0) return;
@@ -60,16 +80,7 @@ namespace BittrexModels.ActorModels
 
         public async Task Observe()
         {
-            // TODO: добавить очередь запросов: не привышать 60 запросов в минуту
-            // request
-            BittrexClient client = new BittrexClient("", "");
-            var ordersBid = await client.GetOrderBook(this.TargetMarket, BookOrderType.Buy, 10); // !!
-            var ordersAsk = await client.GetOrderBook(this.TargetMarket, BookOrderType.Sell, 10);
-            var bidPrice = await client.GetMarketSummary(this.TargetMarket);
-
-            var sumBid = ordersBid.Result.Sum(x => x.Quantity);
-            var sumAsk = ordersAsk.Result.Sum(x => x.Quantity);
-            var obs = new Observation(bidPrice.Result.Bid, bidPrice.Result.Ask, sumAsk, sumBid);
+            var obs = await Observation.MakeObservation(this.TargetMarket);
             this.Observations.Add(obs);
             return;
         }
@@ -96,17 +107,18 @@ namespace BittrexModels.ActorModels
 
         public void CheckBuyRules()
         {
-            var persuasiveness = 0.0;
-            foreach (var s in Rules)
-            {
-                persuasiveness += s.RuleRecomendation(this.Observations.ToArray());
-            }
-            persuasiveness /= Rules.Count;
+            var persuasiveness = Rules.Sum(x => x.RuleRecomendation(this.Observations.ToArray())) / Rules.Count;
+           
             if (persuasiveness > HesitationToBuy)
-               Transaction.CreateTransaction(OperationType.Buy, this,
-                    CountVolume.BtcCount * (decimal)(OperationPercent * (persuasiveness - HesitationToBuy)));
+            {
+                var transSum = CountVolume.BtcCount * (decimal)(Consts.OperationCommisionPercent * (persuasiveness - HesitationToBuy));
+                if (transSum > Consts.MinimalOperationSum)
+                    Transaction.CreateTransaction(OperationType.Buy, this,
+                         CountVolume.BtcCount * (decimal)(Consts.OperationCommisionPercent * (persuasiveness - HesitationToBuy)));
+                
+            }
         }
     }
 
-     
+
 }

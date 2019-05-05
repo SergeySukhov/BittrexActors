@@ -54,6 +54,7 @@
     <Compile Include="ActorModels\Prediction.cs" />
     <Compile Include="ActorModels\Rule.cs" />
     <Compile Include="ActorModels\Transaction.cs" />
+    <Compile Include="Consts.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
