@@ -1,33 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using BittrexModels.Interfaces;
+
 
 namespace BittrexModels.ActorModels
 {
-    public class Account
+    public class Account: IAccount
     {
-        private decimal btcCount = 0, targetCurrencyCount;
+        public string CurrencyName { get; set; }
 
-        public string TargetCurrencyName { get; set; }
-
-        public decimal BtcCount
-        {
-            get => btcCount; set
-            {
-                if (value < 0) throw new Exception("Невозможно установить отрицательный баланс!");
-                btcCount = value;
-            }
-        }
-        public decimal TargetCurrencyCount
-        {
-            get => targetCurrencyCount; set
-            {
-                if (value < 0) throw new Exception("Невозможно установить отрицательный баланс!");
-                targetCurrencyCount = value;
-            }
-        }
+        public decimal BtcCount { get; set; }
+        public decimal CurrencyCount { get; set; }
         
     }
 }

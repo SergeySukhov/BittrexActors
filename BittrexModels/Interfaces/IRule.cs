@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BittrexCore
+namespace BittrexModels.Interfaces
 {
-    class BittrexApiManager
+    interface IRule
     {
     }
 }

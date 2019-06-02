@@ -49,12 +49,19 @@
   <ItemGroup>
     <Compile Include="ActorModels\Account.cs" />
     <Compile Include="ActorModels\Actor.cs" />
+    <Compile Include="Models\BittrexApiManager.cs" />
     <Compile Include="ActorModels\DayBounds.cs" />
     <Compile Include="ActorModels\Observation.cs" />
-    <Compile Include="ActorModels\Prediction.cs" />
     <Compile Include="ActorModels\Rule.cs" />
-    <Compile Include="ActorModels\Transaction.cs" />
-    <Compile Include="Consts.cs" />
+    <Compile Include="Interfaces\IAccount.cs" />
+    <Compile Include="Interfaces\IActor.cs" />
+    <Compile Include="Interfaces\IBittrexApi.cs" />
+    <Compile Include="Interfaces\IObservation.cs" />
+    <Compile Include="Interfaces\IRule.cs" />
+    <Compile Include="Interfaces\ITransaction.cs" />
+    <Compile Include="Interfaces\ITransactionManager.cs" />
+    <Compile Include="Models\Transaction.cs" />
+    <Compile Include="Models\TransactionManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

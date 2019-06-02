@@ -3,23 +3,12 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bittrex.Api.Client.Models;
 using Bittrex.Api.Client;
+using BittrexModels.Interfaces;
 
 namespace BittrexModels.ActorModels
 {
-    public enum OperationType
-    {
-        Buy, // покупка целовой валюты - продажа базовой (btc)
-        Sell // продажа целевой валюты - покупка базовой (btc)
-    }
-    public enum TransactionResult
-    {
-        Success,
-        WithWarnings,
-        Awaiting,
-        Error,
-        Canceled
-    }
-    public class Transaction
+   
+    public class Transaction: ITransaction
     {
         public static Dictionary<string, Transaction> AllTransactions { get; }
         
@@ -30,24 +19,24 @@ namespace BittrexModels.ActorModels
         /// Обработка очередной транзакции
         /// todo: добавить параллельность для разных актеров и проверку на 60 транзакций в минуту
         /// </summary>
-        private async static void ProcessTransactions()
+        public async static void ProcessTransactions()
         {
             if (AwaitingTransactions.Count == 0) return;
 
             var currentTransaction = AwaitingTransactions.Peek();
             currentTransaction.TransactionResult = await currentTransaction.CommitTransaction();
-            // при успешном выполнении транзакции зачисляем валюту
+            // при успешном выполнении транзакции зачисляем деньги
             if (currentTransaction.TransactionResult == TransactionResult.Success)
             {
                 if (currentTransaction.Type == OperationType.Buy)
-                    currentTransaction.Actor.CountVolume.TargetCurrencyCount += currentTransaction.CurrencySum;
+                    currentTransaction.Actor.CountVolume.CurrencyCount += currentTransaction.CurrencySum;
                 if (currentTransaction.Type == OperationType.Sell)
                     currentTransaction.Actor.CountVolume.BtcCount += currentTransaction.BtcSum;
             }
             else // иначе возвращаем
             {
                 if (currentTransaction.Type == OperationType.Sell)
-                    currentTransaction.Actor.CountVolume.TargetCurrencyCount += currentTransaction.CurrencySum;
+                    currentTransaction.Actor.CountVolume.CurrencyCount += currentTransaction.CurrencySum;
                 if (currentTransaction.Type == OperationType.Buy)
                     currentTransaction.Actor.CountVolume.BtcCount += currentTransaction.BtcSum;
             }           
@@ -58,7 +47,7 @@ namespace BittrexModels.ActorModels
         /// <param name="operationType"></param>
         /// <param name="actor"></param>
         /// <param name="sum"></param>
-        public static void CreateTransaction(OperationType operationType, Actor actor, decimal sum)
+        internal static void CreateTransaction(OperationType operationType, Actor actor, decimal sum, IBittrexApi bittrexApi)
         {
             var newTransaction = new Transaction(operationType, actor, sum);
             if (!newTransaction.PrecheckTransaction())
@@ -67,7 +56,7 @@ namespace BittrexModels.ActorModels
                 return;
             }
             // замораживаем счет
-            newTransaction.Actor.CountVolume.TargetCurrencyCount -= newTransaction.CurrencySum;
+            newTransaction.Actor.CountVolume.CurrencyCount -= newTransaction.CurrencySum;
             newTransaction.Actor.CountVolume.BtcCount -= newTransaction.BtcSum;
             // заносим в очередь на обработку
             AwaitingTransactions.Enqueue(newTransaction);
@@ -100,7 +89,7 @@ namespace BittrexModels.ActorModels
 
         private Transaction(OperationType operationType, Actor actor, decimal sum)
         {
-            AllTransactions.Add(actor.Guid.ToString(), this);
+            AllTransactions.Add(actor.Id.ToString(), this);
             this.Type = operationType;
             if (Type == OperationType.Buy) this.BtcSum = sum;
             if (Type == OperationType.Sell) this.CurrencySum = sum;
@@ -115,6 +104,7 @@ namespace BittrexModels.ActorModels
         /// <returns></returns>
         private async Task<TransactionResult> CommitTransaction()
         {
+            // TODO: поменять на прослойку api
             var startTransact = DateTime.Now;
             ApiResult<Ticker> apiResult = null;
             try
@@ -140,7 +130,7 @@ namespace BittrexModels.ActorModels
         private bool PrecheckTransaction()
         {
             return (this.Type == OperationType.Buy && Actor.CountVolume.BtcCount >= BtcSum) 
-                || (this.Type == OperationType.Sell && Actor.CountVolume.TargetCurrencyCount >= CurrencySum);
+                || (this.Type == OperationType.Sell && Actor.CountVolume.CurrencyCount >= CurrencySum);
         }
 
     }
