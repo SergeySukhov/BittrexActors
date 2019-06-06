@@ -5,12 +5,13 @@ namespace BittrexModels.ActorModels
 {
     public class Observation : IObservation
     {
-       public DateTime ObservationTime { get; }
+       public DateTime ObservationTime { get; set; }
        
-       public decimal BidPrice { get; }
-       public decimal AskPrice { get; }
-       public decimal OrderAskSum { get; }
-       public decimal OrderBidSum { get; }
+       public decimal BidPrice { get; set; }
+       public decimal AskPrice { get; set; }
+       public decimal OrderAskSum { get; set; }
+       public decimal OrderBidSum { get; set; }
+        public bool IsComplete { get; set; }
 
         public Observation(decimal bid, decimal ask, decimal orderAskSum, decimal orderBidSum)
         {
@@ -19,8 +20,13 @@ namespace BittrexModels.ActorModels
             OrderAskSum = orderAskSum;
             OrderBidSum = orderBidSum;
             this.ObservationTime = DateTime.Now;
+            IsComplete = true;
         }
 
+        public Observation()
+        {
+            IsComplete = false;
+        }
        
     }
 }

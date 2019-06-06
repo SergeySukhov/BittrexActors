@@ -8,11 +8,11 @@ namespace BittrexModels.Interfaces
 {
     public interface IObservation
     {
-        DateTime ObservationTime { get; }
+        DateTime ObservationTime { get; set; }
 
-        decimal BidPrice { get; }
-        decimal AskPrice { get; }
-        decimal OrderAskSum { get; }
-        decimal OrderBidSum { get; }
+        decimal BidPrice { get; set; }
+        decimal AskPrice { get; set; }
+        decimal OrderAskSum { get; set; }
+        decimal OrderBidSum { get; set; }
     }
 }

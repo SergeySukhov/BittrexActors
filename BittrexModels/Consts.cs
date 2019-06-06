@@ -1,15 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace BittrexModels
 {
     public static class Consts
     {
-        public static string LogFilePath = Environment.CurrentDirectory + "\\BittrexActorsLogs.txt";
-        public static double StartActorBuyHesitation = 1.0;
-        public static double StartActorSellHesitation = 1.0;
-        public static double OperationCommisionPercent = 0.0125;
-        public static decimal MinimalOperationSum = 0.0005m;
+        public static readonly int BittrexRequestLimit = 55;
 
+        // Actors consts
 
+        public static readonly double StartHesitationToSell = 1.0;
+        public static readonly double StartHesitationToBuy = 1.0;
+        public static readonly double OperationPercent = 0.05;
+        public static readonly decimal StartCountVolumeBtc = 0.5m;
     }
 }

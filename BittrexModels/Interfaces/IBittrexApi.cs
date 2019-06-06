@@ -14,9 +14,8 @@ namespace BittrexModels.Interfaces
         
         List<DateTime> OperationJournal { get; }
 
-        //Task<TransactionResult> CommitTransaction(ITransaction transaction);
         Task<IObservation> GetObservation(string TargetMarket);
-        Task<bool> CheckConnection();
+        // Task<bool> CheckConnection();
         Task<decimal> GetPrice(ITransaction transaction);
     }
 }

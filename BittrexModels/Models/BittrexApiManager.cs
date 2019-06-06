@@ -2,27 +2,46 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Bittrex.Api.Client;
 using Bittrex.Api.Client.Models;
 using BittrexModels.Interfaces;
+using System.Timers;
 
 namespace BittrexModels.ActorModels
 {
     public class BittrexApiManager : IBittrexApi
     {
-        //private string ApiKey;
-
         public bool ApiReady;
 
         public BittrexClient BittrexClient { get; }
 
         public List<DateTime> OperationJournal { get; }
 
+        private Queue<Task> Tasks { get; }
+
         public BittrexApiManager(BittrexClient bittrexClient)
         {
             this.BittrexClient = bittrexClient;
-            // this.ApiKey = apiKey;
+            OperationJournal = new List<DateTime>();
+            Tasks = new Queue<Task>();
+
+            System.Timers.Timer timer = new System.Timers.Timer();
+            timer.Interval = 1000;
+            timer.Elapsed += ProcessRequestTimerAction;
+            timer.Start();
+        }
+
+
+        public void ProcessRequestTimerAction(object sender, EventArgs e)
+        {
+            if (Tasks.Count == 0) return;
+            if (CheckRequestLimit())
+            {
+                var task = Tasks.Dequeue();
+                task.Start();
+            }
         }
 
         /// <summary>
@@ -37,68 +56,97 @@ namespace BittrexModels.ActorModels
 
         public async Task<decimal> GetPrice(ITransaction transaction)
         {
-            ApiResult<Ticker> apiResult = null;
-
-            try
+            Task<decimal> task = new Task<decimal>(() =>
             {
-                apiResult = await this.BittrexClient.GetTicker(transaction.MarketName);
+                try
+                {
+                    ApiResult<Ticker> apiResult = null;
 
-                if (transaction.Type == OperationType.Buy)
-                    return apiResult.Result.Ask;
-                else
-                    return apiResult.Result.Bid;
-            }
-            catch (Exception ex)
-            {
-                // todo: logger
-                return 0;
-            }
+                    var t = this.BittrexClient.GetTicker(transaction.MarketName);
+                    Task.WaitAll(t);
+                    apiResult = t.Result;
+                    OperationJournal.Add(DateTime.Now);
+
+                    if (transaction.Type == OperationType.Buy)
+                        return apiResult.Result.Ask;
+                    else
+                        return apiResult.Result.Bid;
+                } catch (Exception ex)
+                {
+                    return 0;
+                }
+
+            });
+            Tasks.Enqueue(task);
+
+            return await task;
         }
 
-        public async Task<TransactionResult> CommitTransaction(ITransaction transaction)
-        {
-            var startTransact = DateTime.Now;
-            ApiResult<Ticker> apiResult = null;
-            try
-            {
-                apiResult = await this.BittrexClient.GetTicker(transaction.MarketName);
-                if (!apiResult.Success) throw new Exception(apiResult.Message); // todo: добавить проверку связанную с api и интернетом
-                //if (transaction.Type == OperationType.Buy)
-                //    transaction.CurrencySum = transaction.BtcSum / apiResult.Result.Ask; // сколько куплено на указанное кол-во btc
-                ////if (transaction.Type == OperationType.Sell)
-                //    transaction.BtcSum = apiResult.Result.Bid * transaction.CurrencySum; // сколько btc куплено
+ 
+    
 
-                if (DateTime.Now - startTransact > new TimeSpan(0, 1, 0) && apiResult.Success) return TransactionResult.WithWarnings;
-                return TransactionResult.Success;
-            }
-            catch (Exception e)
+    public async Task<IObservation> GetObservation(string TargetMarket)
+        {
+            var cts = new CancellationTokenSource();
+
+
+            Task<Observation> task = new Task<Observation>(() =>
             {
-                return TransactionResult.Error;
-            }
+                try
+                {
+                    var ordersBid = BittrexClient.GetOrderBook(TargetMarket, BookOrderType.Buy, 10); // !!
+                    var ordersAsk = BittrexClient.GetOrderBook(TargetMarket, BookOrderType.Sell, 10);
+                    var price = BittrexClient.GetMarketSummary(TargetMarket);
+
+                    Task.WaitAll(ordersBid, ordersAsk, price);
+
+                    var obs = new Observation();
+
+                    OperationJournal.Add(DateTime.Now);
+                    OperationJournal.Add(DateTime.Now);
+                    OperationJournal.Add(DateTime.Now);
+
+                    var sumBid = ordersBid.Result.Result.Sum(x => x.Quantity);
+                    var sumAsk = ordersAsk.Result.Result.Sum(x => x.Quantity);
+                    obs.BidPrice = price.Result.Result.Bid;
+                    obs.AskPrice = price.Result.Result.Ask;
+                    obs.OrderAskSum = sumAsk;
+                    obs.OrderBidSum = sumBid;
+                    obs.ObservationTime = DateTime.Now;
+                    obs.IsComplete = true;
+                    return obs;
+                }
+                catch (Exception ex)
+                {
+                    // TODO: logger 
+                    return null;
+                }
+            }, cts.Token);
+                       
+            Tasks.Enqueue(task);
+
+            return await task;
         }
 
-        public async Task<IObservation> GetObservation(string TargetMarket)
-        {
-            try
-            {
-                var ordersBid = await BittrexClient.GetOrderBook(TargetMarket, BookOrderType.Buy, 10); // !!
-                var ordersAsk = await BittrexClient.GetOrderBook(TargetMarket, BookOrderType.Sell, 10);
-                var bidPrice = await BittrexClient.GetMarketSummary(TargetMarket);
+             
 
-                var sumBid = ordersBid.Result.Sum(x => x.Quantity);
-                var sumAsk = ordersAsk.Result.Sum(x => x.Quantity);
-                var obs = new Observation(bidPrice.Result.Bid, bidPrice.Result.Ask, sumAsk, sumBid);
-                return obs;
-            } catch (Exception ex)
+        private bool CheckRequestLimit()
+        {
+            if (OperationJournal.Count < Consts.BittrexRequestLimit) return true;
+
+            var now = DateTime.Now;
+            var minute = new TimeSpan(0, 1, 0);
+            int count = 0;
+
+            for(int i = OperationJournal.Count - 1; i >= 0; i--)
             {
-                // TODO: logger
-                return null;
+                if (now - OperationJournal[i] > minute) break;
+                count++;
             }
-        }
+            OperationJournal.RemoveRange(0, OperationJournal.Count - count);
 
-        public async Task<bool> CheckConnection()
-        {
-            throw new NotImplementedException();
-        }       
+            return OperationJournal.Count < Consts.BittrexRequestLimit;
+            
+        }
     }
 }

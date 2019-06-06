@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BittrexModels.Interfaces
 {
-    public interface IRule
+    public interface IRulesLibrary
     {
     }
 }

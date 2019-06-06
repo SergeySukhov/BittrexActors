@@ -21,7 +21,9 @@ namespace BittrexCore
 
             TransactionManager transactionManager = new TransactionManager(apiManager);
 
-            var actor = new Actor("BTC-LTC", new TimeSpan(0, 0, 4), apiManager, transactionManager);
+            var actor = new Actor("BTC-LTC", new TimeSpan(0, 0, 1), apiManager, transactionManager);
+            var actor1 = new Actor("BTC-LTC", new TimeSpan(0, 0, 1), apiManager, transactionManager);
+            var actor2 = new Actor("BTC-LTC", new TimeSpan(0, 0, 1), apiManager, transactionManager);
             tempActor = actor;
             var rule = new Rule(RuleType.ForBuy);
             rule.Conditions.Add(x => { return 2; }); // TODO: rule library
@@ -32,7 +34,10 @@ namespace BittrexCore
             timer.Interval = Consts.MainTimerInterval;
             timer.Elapsed += transactionManager.ProcessTransaction;
             timer.Elapsed += actor.ActorTimerAction;
+            //timer.Elapsed += actor1.ActorTimerAction;
+            //timer.Elapsed += actor2.ActorTimerAction;
             timer.Elapsed += Timer_Elapsed;
+            
             timer.Start();
             Console.ReadLine();
         }
@@ -40,7 +45,7 @@ namespace BittrexCore
         private static void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             Console.WriteLine($"Actor: {tempActor.Id.ToString().Substring(0, 3)}" +
-                $" CountVol: {tempActor.CountVolume.BtcCount} | {tempActor.CountVolume.CurrencyCount}");
+                $" CountVol: {tempActor.CountVolume.BtcCount} | {tempActor.CountVolume.CurrencyCount} | Obs count: {tempActor.Observations.Count}");
             Console.WriteLine("================");           
         }
 

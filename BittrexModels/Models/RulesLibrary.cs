@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BittrexModels.Interfaces
+namespace BittrexModels.Models
 {
-    public interface IRule
+    public static class RulesLibrary
     {
+
     }
 }
