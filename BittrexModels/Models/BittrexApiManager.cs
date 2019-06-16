@@ -8,6 +8,7 @@ using Bittrex.Api.Client;
 using Bittrex.Api.Client.Models;
 using BittrexModels.Interfaces;
 using System.Timers;
+using DataManager.Models;
 
 namespace BittrexModels.ActorModels
 {
@@ -26,11 +27,6 @@ namespace BittrexModels.ActorModels
             this.BittrexClient = bittrexClient;
             OperationJournal = new List<DateTime>();
             Tasks = new Queue<Task>();
-
-            System.Timers.Timer timer = new System.Timers.Timer();
-            timer.Interval = 1000;
-            timer.Elapsed += ProcessRequestTimerAction;
-            timer.Start();
         }
 
 
@@ -54,7 +50,7 @@ namespace BittrexModels.ActorModels
             return true;
         }
 
-        public async Task<decimal> GetPrice(ITransaction transaction)
+        public async Task<decimal> GetPrice(Transaction transaction)
         {
             Task<decimal> task = new Task<decimal>(() =>
             {
@@ -82,38 +78,38 @@ namespace BittrexModels.ActorModels
             return await task;
         }
 
- 
-    
 
-    public async Task<IObservation> GetObservation(string TargetMarket)
+
+
+        public async Task<Observation> GetObservation(string TargetMarket)
         {
             var cts = new CancellationTokenSource();
 
 
             Task<Observation> task = new Task<Observation>(() =>
             {
-                try
-                {
-                    var ordersBid = BittrexClient.GetOrderBook(TargetMarket, BookOrderType.Buy, 10); // !!
-                    var ordersAsk = BittrexClient.GetOrderBook(TargetMarket, BookOrderType.Sell, 10);
-                    var price = BittrexClient.GetMarketSummary(TargetMarket);
+            try
+            {
+                var ordersBid = BittrexClient.GetOrderBook(TargetMarket, BookOrderType.Buy, 10); // !!
+                var ordersAsk = BittrexClient.GetOrderBook(TargetMarket, BookOrderType.Sell, 10);
+                var price = BittrexClient.GetMarketSummary(TargetMarket);
 
-                    Task.WaitAll(ordersBid, ordersAsk, price);
+                Task.WaitAll(ordersBid, ordersAsk, price);
 
-                    var obs = new Observation();
 
-                    OperationJournal.Add(DateTime.Now);
-                    OperationJournal.Add(DateTime.Now);
-                    OperationJournal.Add(DateTime.Now);
-
-                    var sumBid = ordersBid.Result.Result.Sum(x => x.Quantity);
-                    var sumAsk = ordersAsk.Result.Result.Sum(x => x.Quantity);
-                    obs.BidPrice = price.Result.Result.Bid;
-                    obs.AskPrice = price.Result.Result.Ask;
-                    obs.OrderAskSum = sumAsk;
-                    obs.OrderBidSum = sumBid;
-                    obs.ObservationTime = DateTime.Now;
-                    obs.IsComplete = true;
+                OperationJournal.Add(DateTime.Now);
+                OperationJournal.Add(DateTime.Now);
+                OperationJournal.Add(DateTime.Now);
+                    var obs = new Observation()
+                    {
+                        Guid = Guid.NewGuid(),
+                        ObservationTime = DateTime.Now,
+                        MarketName = TargetMarket,
+                        BidPrice = price.Result.Result.Bid,
+                        AskPrice = price.Result.Result.Ask,
+                        OrderBidSum = ordersBid.Result.Result.Sum(x => x.Quantity),
+                        OrderAskSum = ordersAsk.Result.Result.Sum(x => x.Quantity)
+                    };
                     return obs;
                 }
                 catch (Exception ex)

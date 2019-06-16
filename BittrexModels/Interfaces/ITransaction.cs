@@ -9,11 +9,11 @@ namespace BittrexModels.Interfaces
     }
     public enum TransactionResult
     {
-        Success,
-        WithWarnings,
-        Awaiting,
-        Error,
-        Canceled
+        Success = 0,
+        WithWarnings = 1,
+        Awaiting = 2,
+        Error = 3,
+        Canceled = 4,
     }
 
     public interface ITransaction
@@ -30,7 +30,7 @@ namespace BittrexModels.Interfaces
         /// <summary>
         /// Сумма целевой валюты
         /// </summary>
-        decimal CurrencySum { get; set; }
+        decimal CurrencySum { get; }
         /// <summary>
         /// Наименование магазина для Bittrex.Api
         /// </summary>
@@ -38,8 +38,13 @@ namespace BittrexModels.Interfaces
         /// <summary>
         /// Состояние транзакции
         /// </summary>
+         
+        DateTime CreationTime { get; }
+
+        DateTime ReleaseTime { get; set; }
+
         TransactionResult TransactionResult { get; set; }
 
-        IAccount Account { get; }
+        IAccount Account { get; }        
     }
 }

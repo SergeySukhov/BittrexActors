@@ -1,5 +1,7 @@
 ﻿using BittrexModels.Interfaces;
 using BittrexModels.Models;
+using DataManager.Models;
+using DataManager.Providers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,15 +14,18 @@ namespace BittrexModels.Models
     {
         private IBittrexApi BittrexApi;
 
-        public List<ITransaction> AllTransactions { get; }
+        private BittrexDbProvider BittrexDbProvider;
 
-        public Queue<ITransaction> AwaitingTransactions { get; }
+        public List<Transaction> AllTransactions { get; }
 
-        public TransactionManager(IBittrexApi bittrexApi)
+        public Queue<Transaction> AwaitingTransactions { get; }
+
+        public TransactionManager(IBittrexApi bittrexApi, BittrexDbProvider bittrexDbProvider)
         {
+            this.BittrexDbProvider = bittrexDbProvider;
             this.BittrexApi = bittrexApi;
-            this.AwaitingTransactions = new Queue<ITransaction>();
-            this.AllTransactions = new List<ITransaction>();
+            this.AwaitingTransactions = new Queue<Transaction>();
+            this.AllTransactions = new List<Transaction>();
         }
 
         // присоединить к главному таймеру
@@ -31,16 +36,19 @@ namespace BittrexModels.Models
             var currentTransaction = AwaitingTransactions.Dequeue();
 
             currentTransaction.TransactionResult = await CommitTransaction(currentTransaction);
-                        
+            currentTransaction.ReleaseTime = DateTime.Now;
+            await Task.Factory.StartNew(() => BittrexDbProvider.SaveTransaction(currentTransaction));
+
         }
 
-        public async Task<TransactionResult> CommitTransaction(ITransaction transaction)
+        public async Task<TransactionResult> CommitTransaction(Transaction transaction)
         {
             decimal price = 0;
             try
             {
                 // узнаем цену целевой валюты в btc
                 price = await BittrexApi.GetPrice(transaction);
+
                 if (price == 0) return TransactionResult.Error;
 
             } catch (Exception ex)
@@ -81,21 +89,32 @@ namespace BittrexModels.Models
         /// 
         /// </summary>
         /// <param name="operationType"></param>
-        /// <param name="CurrencySum">Сколько валюты покупать/продавать</param>
+        /// <param name="currencySum">Сколько валюты покупать/продавать</param>
         /// <param name="marketName"></param>
         /// <param name="account"></param>
         /// <returns></returns>
-        public ITransaction CreateTransaction(OperationType operationType, decimal CurrencySum, string marketName, IAccount account)
+        public Transaction CreateTransaction(OperationType operationType, decimal currencySum, string marketName, Account account)
         {
-            var newTransaction = new Transaction(operationType, CurrencySum, marketName, account);
+            var newTransaction = new Transaction
+            {
+                Guid = Guid.NewGuid(),
+                Type = operationType,
+                CurrencySum = currencySum,
+                MarketName = marketName,
+                Account = account,
+                CreationTime = DateTime.Now,
+                TransactionResult = TransactionResult.Created,
+                ReleaseTime = DateTime.Now
+            };
             AllTransactions.Add(newTransaction);
                        
             // заносим в очередь на обработку
             AwaitingTransactions.Enqueue(newTransaction);
+            Task.Factory.StartNew(() => BittrexDbProvider.SaveTransaction(newTransaction, true));
             return newTransaction;
         }
 
-        public bool PrecheckTransaction(ITransaction transaction)
+        public bool PrecheckTransaction(Transaction transaction)
         {
             return true;
             //return (transaction.Type == OperationType.Buy && transaction.Account.BtcCount >= transaction.BtcSum && transaction.BtcSum > 0.0005m)

@@ -16,5 +16,6 @@ namespace BittrexModels
         public static readonly double StartHesitationToBuy = 1.0;
         public static readonly double OperationPercent = 0.05;
         public static readonly decimal StartCountVolumeBtc = 0.5m;
+        public static readonly int ObservationTimeInaccuracy = 5;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Bittrex.Api.Client;
 using BittrexModels.Interfaces;
+using DataManager.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,8 +15,8 @@ namespace BittrexModels.Interfaces
         
         List<DateTime> OperationJournal { get; }
 
-        Task<IObservation> GetObservation(string TargetMarket);
+        Task<Observation> GetObservation(string TargetMarket);
         // Task<bool> CheckConnection();
-        Task<decimal> GetPrice(ITransaction transaction);
+        Task<decimal> GetPrice(Transaction transaction);
     }
 }

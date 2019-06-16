@@ -9,7 +9,7 @@ namespace BittrexCore.Models
     public static class Consts
     {
         public static readonly string LogFilePath = Environment.CurrentDirectory + "\\BittrexActorsLogs.txt";
-        public static readonly int MainTimerInterval = 1000;
+        public static readonly int MainTimerInterval = 2000;
 
     }
 }

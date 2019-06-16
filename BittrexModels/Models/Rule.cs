@@ -1,4 +1,6 @@
 ﻿using BittrexModels.Interfaces;
+using BittrexModels.Models;
+using DataManager.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,33 +9,32 @@ using System.Threading.Tasks;
 
 namespace BittrexModels.ActorModels
 {
-    public delegate int Condition(IObservation[] observations);
+    public delegate double Condition(Observation[] observations);
 
-    public enum RuleType
+    public class Rule : DataManager.Models.Rule
     {
-        ForBuy,
-        ForSell
-    }
-
-    public class Rule
-    {
+        private List<RulesLibrary.RuleNames> ConditionNames { get; set; }
         
-        public List<Condition> Conditions { get; }
-        public double Rating = 1;
-        public TimeSpan TickAim;
-        public RuleType Type;
-
-       
         public Rule(RuleType ruleType)
         {
-            this .Type = ruleType;
-            Conditions = new List<Condition>();
+            Guid = Guid.NewGuid();
+            Rating = 1;
+            Type = ruleType;
+            ConditionNames = new List<RulesLibrary.RuleNames>();
         }
-        public double RuleRecomendation(IObservation[] observations)
-        {            
-            return Conditions.Sum(x => x(observations))*Rating;
-        }
-    }
-    
 
-}
+        public void AddNewCondition(RulesLibrary.RuleNames ruleName)
+        {
+            ConditionNames.Add(ruleName);
+            ConditionSplitedNames += ConditionSplitedNames == "" ? "" : "|" + ruleName.ToString();
+        }
+
+        public double RuleRecomendation(Observation[] observations)
+        {
+            return ConditionNames.Sum(x => RulesLibrary.AllConditions[x](observations));
+        }
+
+    }
+}    
+
+

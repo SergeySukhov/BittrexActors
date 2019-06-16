@@ -1,52 +1,62 @@
 ﻿using System;
 using Newtonsoft.Json;
-using Bittrex.Api.Client.Models;
 using Bittrex.Api.Client;
 using System.Linq;
 using BittrexModels.ActorModels;
 using System.Timers;
 using BittrexModels.Models;
 using BittrexCore.Models;
+using DataManager.Providers;
+using DataManager.Models;
 
 namespace BittrexCore
 {
     class Program
     {
         static Actor tempActor;
+        static BittrexDbProvider bdProvider;
         static void Main(string[] args)
         {
             //h(); TODO: need start manager and actor factory
             BittrexClient bittrexClient = new BittrexClient("6c58ca3f387b4581ab2ba324b7a78dd5", "");
-            BittrexApiManager apiManager = new BittrexApiManager(bittrexClient);
 
-            TransactionManager transactionManager = new TransactionManager(apiManager);
+            BittrexApiManager bittrexApiManager = new BittrexApiManager(bittrexClient);
+            bdProvider = new BittrexDbProvider();
 
-            var actor = new Actor("BTC-LTC", new TimeSpan(0, 0, 1), apiManager, transactionManager);
-            var actor1 = new Actor("BTC-LTC", new TimeSpan(0, 0, 1), apiManager, transactionManager);
-            var actor2 = new Actor("BTC-LTC", new TimeSpan(0, 0, 1), apiManager, transactionManager);
+            TransactionManager transactionManager = new TransactionManager(bittrexApiManager, bdProvider);
+
+            RulesLibrary rulesLibrary = new RulesLibrary();
+
+            ActorManager actorManager = new ActorManager(bittrexApiManager, bdProvider, transactionManager);
+
+
+
+            var actor = actorManager.CreateActor("BTC-LTC", new TimeSpan(0, 0, 7));
+            actorManager.SetupActor(actor, RulesLibrary.AllRules[RulesLibrary.RuleNames.FirstRuleBuy30min]);
+
             tempActor = actor;
-            var rule = new Rule(RuleType.ForBuy);
-            rule.Conditions.Add(x => { return 2; }); // TODO: rule library
-
-            actor.Rules.Add(rule);
 
             Timer timer = new Timer();
             timer.Interval = Consts.MainTimerInterval;
+
             timer.Elapsed += transactionManager.ProcessTransaction;
-            timer.Elapsed += actor.ActorTimerAction;
-            //timer.Elapsed += actor1.ActorTimerAction;
-            //timer.Elapsed += actor2.ActorTimerAction;
+            timer.Elapsed += bittrexApiManager.ProcessRequestTimerAction;
+            timer.Elapsed += actorManager.ActorsTimerAction;
+
             timer.Elapsed += Timer_Elapsed;
             
             timer.Start();
             Console.ReadLine();
         }
 
+        static int iii = 0;
         private static void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            Console.WriteLine($"Actor: {tempActor.Id.ToString().Substring(0, 3)}" +
+            Console.WriteLine($"Actor: {tempActor.Guid.ToString().Substring(0, 3)}" +
                 $" CountVol: {tempActor.CountVolume.BtcCount} | {tempActor.CountVolume.CurrencyCount} | Obs count: {tempActor.Observations.Count}");
-            Console.WriteLine("================");           
+            Console.WriteLine("================");
+            iii++;
+            // if (iii == 5) bdProvider.SaveActor(tempActor);
         }
 
         #region Examples
