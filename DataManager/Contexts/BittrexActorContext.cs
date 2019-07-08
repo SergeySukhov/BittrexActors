@@ -9,6 +9,7 @@ namespace DataManager.Models
         public BittrexDbContext(): base("testDb0.1")
         {
             Configuration.LazyLoadingEnabled = true;
+            Configuration.AutoDetectChangesEnabled = false;
         }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
@@ -22,6 +23,7 @@ namespace DataManager.Models
             modelBuilder.Entity<Observation>().Property(x => x.OrderAskSum).HasPrecision(16, 8);
 
             modelBuilder.Entity<Transaction>().Property(x => x.CurrencySum).HasPrecision(16, 8);
+            modelBuilder.Entity<Transaction>().Property(x => x.ReleasePrice).HasPrecision(16, 8);
 
             base.OnModelCreating(modelBuilder);
         }
@@ -30,7 +32,5 @@ namespace DataManager.Models
         public DbSet<Observation> Observations { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Rule> Rules { get; set; }
-        //public DbSet<Actor> Actors { get; set; }
-
     }
 }

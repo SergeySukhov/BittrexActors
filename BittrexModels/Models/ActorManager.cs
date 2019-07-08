@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BittrexModels.Interfaces;
+using BittrexModels.Models;
 using DataManager.Models;
 using DataManager.Providers;
 
 namespace BittrexModels.ActorModels
 {
     public class ActorManager
-    {        
+    {
         private IBittrexApi BittrexApi { get; }
         private ITransactionManager TransactionManager { get; }
-        private BittrexDbProvider BittrexDbProvider { get; }
+        private BittrexDbProvider BittrexDbProvider { get; } // TODO: interface
         List<Actor> ActiveActors;
 
         public ActorManager(IBittrexApi bittrexApi, BittrexDbProvider bittrexDbProvider, ITransactionManager transactionManager)
@@ -43,10 +44,42 @@ namespace BittrexModels.ActorModels
             return actor;
         }
 
-        public void SetupActor(Actor actor, Rule rule)
+        public void SetupActor(Actor actor, Rule[] rules)
         {
-            actor.Rules.Add(rule);
+            foreach (var rule in rules)
+            {
+                actor.Rules.Add(rule);
+                rule.ActorGuid = actor.Guid;
+                BittrexDbProvider.SaveRule(rule);
+            }
             this.ActiveActors.Add(actor);
+        }
+
+        public void LoadAllActors()
+        {
+            var allActors = BittrexDbProvider.LoadActorModels();
+            foreach (var loadedActor in allActors)
+            {
+                if (loadedActor != null && !this.ActiveActors.Select(x => x.Guid).Contains(loadedActor.Guid))
+                {
+                    // TransactionManager.InitiateLoadTransactions(loadedActor.Transactions.ToArray());
+                    this.ActiveActors.Add(loadedActor);
+                }
+            }
+
+
+        }
+
+        public Actor LoadActor(Guid guid)
+        {
+            var loadedActor = BittrexDbProvider.LoadActor(guid);
+            if (loadedActor != null && !this.ActiveActors.Select(x => x.Guid).Contains(loadedActor.Guid))
+            {
+                this.ActiveActors.Add(loadedActor);
+                TransactionManager.InitiateLoadTransactions(loadedActor.Transactions.ToArray());
+            }
+
+            return loadedActor;
         }
 
         public void ActorsTimerAction(object sender, EventArgs e)
@@ -70,20 +103,20 @@ namespace BittrexModels.ActorModels
 
                     actor.HesitationToBuy += 0.01;
 
-
+                    BittrexDbProvider.SaveActor(actor);
                 });
-                }
-            
+            }
         }
 
         public Task Observe(Actor actor)
         {
-            return new Task(async() =>
+            return new Task(async () =>
             {
                 var obs = await BittrexApi.GetObservation(actor.TargetMarket);
                 if (obs != null)
                 {
                     actor.Observations.Add(obs);
+                    obs.ActorGuid = actor.Guid;
                     BittrexDbProvider.SaveObservation(obs);
                 }
                 else
@@ -91,7 +124,7 @@ namespace BittrexModels.ActorModels
                     // TODO notifications
                 }
             });
-            
+
         }
 
         public void CheckBuyRules(Actor actor)
@@ -103,97 +136,20 @@ namespace BittrexModels.ActorModels
             }
             persuasiveness /= actor.Rules.Count;
             if (persuasiveness > actor.HesitationToBuy)
-                Task.Factory.StartNew(() =>
-                {
-                    var transaction = TransactionManager.CreateTransaction(OperationType.Buy,
-                     100m * (decimal)(actor.OperationPercent),
-                         actor.TargetMarket, actor.CountVolume);
-                     
-                });
+            {
+                var transaction = TransactionManager
+                    .CreateTransaction(OperationType.Buy, 100m * (decimal)(actor.OperationPercent), actor.TargetMarket, actor.CountVolume);
+                actor.Transactions.Add(transaction);
+            }
         }
 
         public double RuleRecomendation(Rule rule, Observation[] observations)
         {
             var ConditionNames = rule.ConditionSplitedNames.Split('|');
 
-            return ConditionNames.Sum(x => Models.RulesLibrary.AllConditions[(Models.RulesLibrary.RuleNames)int.Parse(x)](observations));
+            return ConditionNames.Sum(x => ConditionsLibrary.AllConditions[(ConditionsLibrary.ConditionsNames)int.Parse(x)](observations));
         }
-
-        /*public Actor toDbActor()
-        {
-            var dbActor = new Actor();
-            dbActor.Observations = new List<DataManager.Models.Observation>();
-            dbActor.Rules = new List<DataManager.Models.Rule>();
-            dbActor.Transactions = new List<DataManager.Models.Transaction>();
-
-            dbActor.Guid = Guid;
-            dbActor.ActivationSpan = ActivationSpan;
-            dbActor.TargetMarket = TargetMarket;
-            dbActor.HesitationToBuy = HesitationToBuy;
-            dbActor.HesitationToSell = HesitationToSell;
-            dbActor.LastActionTime = LastActionTime;
-
-            dbActor.CountVolume = new DataManager.Models.Account()
-            {
-                Guid = this.Guid,
-                BtcCount = CountVolume.BtcCount,
-                CurrencyCount = CountVolume.CurrencyCount,
-                CurrencyName = CountVolume.CurrencyName,
-                Actor = dbActor
-            };
-
-            Observations.ForEach(x => dbActor.Observations.Add(new DataManager.Models.Observation()
-            {
-                Guid = x.Guid,
-                ActorGuid = this.Guid,
-                ObservationTime = x.ObservationTime,
-                AskPrice = x.AskPrice,
-                BidPrice = x.BidPrice,
-                OrderAskSum = x.OrderAskSum,
-                OrderBidSum = x.OrderBidSum,
-                MarketName = x.MarketName,
-                Actor = dbActor
-
-            }));
-
-            Transactions.ForEach(x => dbActor.Transactions.Add(new DataManager.Models.Transaction()
-            {
-                Guid = x.Guid,
-                ActorGuid = this.Guid,
-                CreationTime = x.CreationTime,
-                ReleaseTime = x.ReleaseTime,
-                CurrencySum = x.CurrencySum,
-                MarketName = x.MarketName,
-                TransactionResult = (int)x.TransactionResult,
-                Account = dbActor
-
-            }));
-            Rules.ForEach(x => {
-                var temp = new DataManager.Models.Rule()
-                {
-                    Guid = x.Guid,
-                    ActorGuid = this.Guid,
-                    MinuteInterval = x.MinuteInterval,
-                    Rating = x.Rating,
-                    Type = (int)x.Type,
-                    Actor = dbActor
-                };
-
-                var str = "";
-
-                x.ConditionNames.ForEach(n => str += n.ToString() + "|");
-                str.Trim('|');
-                temp.ConditionSplitedNames = str;
-                dbActor.Rules.Add(temp);
-            });
-
-
-            
-
-            return dbActor;
-        }
-        */
     }
 
-     
 }
+

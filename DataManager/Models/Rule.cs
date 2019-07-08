@@ -30,12 +30,9 @@ namespace DataManager.Models
 
         [Required]
         public Guid ActorGuid { get; set; }
-
-        [ForeignKey("ActorGuid")]
-        public virtual Actor Actor { get; set; }
     }
 
-    
-    
+
+
 
 }

@@ -29,16 +29,31 @@ namespace BittrexModels.Models
         }
 
         // присоединить к главному таймеру
-        public async void ProcessTransaction(object sender, EventArgs e)
+        public void ProcessTransaction(object sender, EventArgs e)
         {
             if (AwaitingTransactions.Count == 0) return;
 
             var currentTransaction = AwaitingTransactions.Dequeue();
+            if (currentTransaction == null)
+            {
+                Console.WriteLine("!! error null TRANSACTION");
+                return;
+            }
+            Task.Factory.StartNew(async () => {
+                if (!PrecheckTransaction(currentTransaction))
+                {
+                    currentTransaction.TransactionResult = TransactionResult.Canceled;
+                }
+                else
+                {
+                    currentTransaction.TransactionResult = TransactionResult.Awaiting;
+                    currentTransaction.TransactionResult = await CommitTransaction(currentTransaction);
+                }
 
-            currentTransaction.TransactionResult = await CommitTransaction(currentTransaction);
-            currentTransaction.ReleaseTime = DateTime.Now;
-            await Task.Factory.StartNew(() => BittrexDbProvider.SaveTransaction(currentTransaction));
-
+                currentTransaction.ReleaseTime = DateTime.Now;
+                BittrexDbProvider.SaveTransaction(currentTransaction);
+            });
+            
         }
 
         public async Task<TransactionResult> CommitTransaction(Transaction transaction)
@@ -48,17 +63,19 @@ namespace BittrexModels.Models
             {
                 // узнаем цену целевой валюты в btc
                 price = await BittrexApi.GetPrice(transaction);
-
                 if (price == 0) return TransactionResult.Error;
 
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 return TransactionResult.Error;
             }
 
+            transaction.ReleasePrice = price;
+
             if (transaction.Type == OperationType.Sell)
                 if (transaction.Account.CurrencyCount >= transaction.CurrencySum
-                && transaction.CurrencySum*price > 0.0005m)
+                && transaction.CurrencySum * price > 0.0005m)
                 {
                     transaction.Account.CurrencyCount -= transaction.CurrencySum;
                     transaction.Account.BtcCount += transaction.CurrencySum * price;
@@ -100,25 +117,43 @@ namespace BittrexModels.Models
                 Guid = Guid.NewGuid(),
                 Type = operationType,
                 CurrencySum = currencySum,
+                ReleasePrice = 0m,
                 MarketName = marketName,
                 Account = account,
                 CreationTime = DateTime.Now,
                 TransactionResult = TransactionResult.Created,
-                ReleaseTime = DateTime.Now
+                ReleaseTime = DateTime.Now,
+                AccountGuid = account.Guid
             };
-            AllTransactions.Add(newTransaction);
-                       
+            BittrexDbProvider.SaveTransaction(newTransaction);
+
             // заносим в очередь на обработку
             AwaitingTransactions.Enqueue(newTransaction);
-            Task.Factory.StartNew(() => BittrexDbProvider.SaveTransaction(newTransaction, true));
+
             return newTransaction;
         }
 
-        public bool PrecheckTransaction(Transaction transaction)
+        public void InitiateLoadTransactions(Transaction[] transactions)
         {
-            return true;
-            //return (transaction.Type == OperationType.Buy && transaction.Account.BtcCount >= transaction.BtcSum && transaction.BtcSum > 0.0005m)
-            //    || (transaction.Type == OperationType.Sell && transaction.Account.CurrencyCount >= transaction.CurrencySum && transaction.CurrencySum > 0.0005m);
+            foreach (var transaction in transactions)
+            {
+                if (transaction.Account != null
+                    && (transaction.TransactionResult == TransactionResult.Created || transaction.TransactionResult == TransactionResult.Awaiting)
+                    && AwaitingTransactions.Select(x => x.Guid).Contains(transaction.Guid)
+                    )
+                    AwaitingTransactions.Enqueue(transaction);
+            }
+        }
+
+        public string ValidateTransactions(Transaction[] transactions)
+        {
+
+            return "ok";
+        }
+
+        private bool PrecheckTransaction(Transaction transaction)
+        {
+            return transaction.Type == OperationType.Sell && transaction.CurrencySum < transaction.Account.CurrencyCount || transaction.Type == OperationType.Buy && transaction.Account.BtcCount > 0.0005m;
         }
 
 

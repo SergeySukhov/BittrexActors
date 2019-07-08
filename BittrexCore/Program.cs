@@ -25,16 +25,28 @@ namespace BittrexCore
 
             TransactionManager transactionManager = new TransactionManager(bittrexApiManager, bdProvider);
 
-            RulesLibrary rulesLibrary = new RulesLibrary();
+            ConditionsLibrary rulesLibrary = new ConditionsLibrary();
 
             ActorManager actorManager = new ActorManager(bittrexApiManager, bdProvider, transactionManager);
 
 
 
-            var actor = actorManager.CreateActor("BTC-LTC", new TimeSpan(0, 0, 7));
-            actorManager.SetupActor(actor, RulesLibrary.AllRules[RulesLibrary.RuleNames.FirstRuleBuy30min]);
+            var actor1 = actorManager.CreateActor("BTC-LTC", new TimeSpan(0, 0, 7));
+            var actor2 = actorManager.CreateActor("BTC-LTC", new TimeSpan(0, 0, 8));
+            //var actor3 = actorManager.CreateActor("BTC-LTC", new TimeSpan(0, 0, 9));
+            //var actor4 = actorManager.CreateActor("BTC-LTC", new TimeSpan(0, 0, 10));
+            //var actor5 = actorManager.CreateActor("BTC-LTC", new TimeSpan(0, 0, 11));
 
-            tempActor = actor;
+            actorManager.SetupActor(actor1, new Rule[] { new Rule() { Guid = Guid.NewGuid(), ConditionSplitedNames = "0", MinuteInterval = 30, Rating = 1, Type = RuleType.ForBuy } });
+            actorManager.SetupActor(actor2, new Rule[] { new Rule() { Guid = Guid.NewGuid(), ConditionSplitedNames = "0", MinuteInterval = 30, Rating = 1, Type = RuleType.ForBuy } });
+            //actorManager.SetupActor(actor3, new Rule[] { new Rule() { Guid = Guid.NewGuid(), ConditionSplitedNames = "0", MinuteInterval = 30, Rating = 1, Type = RuleType.ForBuy } });
+            //actorManager.SetupActor(actor4, new Rule[] { new Rule() { Guid = Guid.NewGuid(), ConditionSplitedNames = "0", MinuteInterval = 30, Rating = 1, Type = RuleType.ForBuy } });
+            //actorManager.SetupActor(actor5, new Rule[] { new Rule() { Guid = Guid.NewGuid(), ConditionSplitedNames = "0", MinuteInterval = 30, Rating = 1, Type = RuleType.ForBuy } });
+
+            actorManager.LoadAllActors();
+
+
+            tempActor = actor1; //actorManager.LoadActor(Guid.Parse("3891F27A-A055-4757-8064-FCFF6FDCCB2C")); // bdProvider.LoadActor(Guid.Parse("E0294E2D-6D57-43E7-93F2-FE1235BF08D4")); //actor1;
 
             Timer timer = new Timer();
             timer.Interval = Consts.MainTimerInterval;
@@ -44,7 +56,7 @@ namespace BittrexCore
             timer.Elapsed += actorManager.ActorsTimerAction;
 
             timer.Elapsed += Timer_Elapsed;
-            
+
             timer.Start();
             Console.ReadLine();
         }

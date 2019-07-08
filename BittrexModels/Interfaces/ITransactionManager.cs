@@ -27,10 +27,16 @@ namespace BittrexModels.Interfaces
         Task<TransactionResult> CommitTransaction(Transaction transaction);
 
         /// <summary>
-        /// Препроверка транзакции
+        /// Перезапускает загруженные невыполненные транзакции
         /// </summary>
-        /// <returns></returns>
-        bool PrecheckTransaction(Transaction transaction);
+        /// <param name="transactions"></param>
+        void InitiateLoadTransactions(Transaction[] transactions);
+
+        /// <summary>
+        /// Проверка выполненых транзакций </summary>
+        /// <param name="transactions"></param>
+        /// <returns>"ок" or "Erorr in AccountGuid, error message|..."</returns>
+        string ValidateTransactions(Transaction[] transactions);
 
     }
 }

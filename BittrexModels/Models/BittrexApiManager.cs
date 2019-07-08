@@ -36,7 +36,8 @@ namespace BittrexModels.ActorModels
             if (CheckRequestLimit())
             {
                 var task = Tasks.Dequeue();
-                task.Start();
+                if (task != null) task.Start();
+                else { Console.WriteLine("!!! null task in BittrexApi"); }
             }
         }
 

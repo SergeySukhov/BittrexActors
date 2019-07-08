@@ -20,7 +20,7 @@ namespace DataManager.Models
     }
 
     public class Transaction
-    {        
+    {
         [Key]
         public Guid Guid { get; set; }
 
@@ -29,6 +29,8 @@ namespace DataManager.Models
 
         [Required]
         public decimal CurrencySum { get; set; }
+
+        public decimal ReleasePrice { get; set; }
 
         [Required]
         public string MarketName { get; set; }
@@ -44,9 +46,8 @@ namespace DataManager.Models
         [Required]
         public Guid AccountGuid { get; set; }
 
-        [ForeignKey("AccountGuid")]
-        public virtual Account Account { get; set; }
-
+        [NotMapped]
+        public Account Account { get; set; }
 
     }
 }
