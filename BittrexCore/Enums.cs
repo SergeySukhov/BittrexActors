@@ -5,7 +5,6 @@ using System.Text;
 
 namespace BittrexCore
 {
-    public class ActorManager
-    {
-    }
+       public enum OperationType { Sell, Buy }
+       public enum TransactionResult { Success, Failed, Error }
 }

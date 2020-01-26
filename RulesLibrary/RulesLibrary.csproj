@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{96CFD74B-E4B7-4AE5-B6F6-314F0B3783C1}</ProjectGuid>
+    <ProjectGuid>{B376A0E8-7B0D-4BA3-98D5-F4DB347FF08B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BittrexCore</RootNamespace>
-    <AssemblyName>BittrexCore</AssemblyName>
+    <RootNamespace>RulesLibrary</RootNamespace>
+    <AssemblyName>RulesLibrary</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -39,17 +39,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ActorFactory.cs" />
-    <Compile Include="ActorManager.cs" />
-    <Compile Include="Actor.cs" />
-    <Compile Include="Models\Account.cs" />
-    <Compile Include="Const.cs" />
-    <Compile Include="Enums.cs" />
-    <Compile Include="Models\Prediction.cs" />
-    <Compile Include="Models\Transaction.cs" />
-    <Compile Include="Models\BalancedRule.cs" />
-    <Compile Include="Models\ActorData.cs" />
+    <Compile Include="RulesLibrary.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DataManagement\DataManagement.csproj">
+      <Project>{f48699a7-1dcf-4e46-8e9b-2679754ccdd9}</Project>
+      <Name>DataManagement</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

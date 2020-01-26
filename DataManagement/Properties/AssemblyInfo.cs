@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // Общие сведения об этой сборке предоставляются следующим набором
 // набора атрибутов. Измените значения этих атрибутов, чтобы изменить сведения,
 // связанные со сборкой.
-[assembly: AssemblyTitle("BittrexCore")]
+[assembly: AssemblyTitle("DataManagement")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("BittrexCore")]
+[assembly: AssemblyProduct("DataManagement")]
 [assembly: AssemblyCopyright("Copyright ©  2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // Следующий GUID служит для идентификации библиотеки типов, если этот проект будет видимым для COM
-[assembly: Guid("96cfd74b-e4b7-4ae5-b6f6-314f0b3783c1")]
+[assembly: Guid("f48699a7-1dcf-4e46-8e9b-2679754ccdd9")]
 
 // Сведения о версии сборки состоят из следующих четырех значений:
 //

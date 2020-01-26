@@ -4,16 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{96CFD74B-E4B7-4AE5-B6F6-314F0B3783C1}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BittrexCore</RootNamespace>
-    <AssemblyName>BittrexCore</AssemblyName>
+    <ProjectGuid>{BCC1D9E2-1C8E-46F1-BB4E-ACE361C79432}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>BittrexCoreConsole</RootNamespace>
+    <AssemblyName>BittrexCoreConsole</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,6 +23,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -39,17 +40,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ActorFactory.cs" />
-    <Compile Include="ActorManager.cs" />
-    <Compile Include="Actor.cs" />
-    <Compile Include="Models\Account.cs" />
-    <Compile Include="Const.cs" />
-    <Compile Include="Enums.cs" />
-    <Compile Include="Models\Prediction.cs" />
-    <Compile Include="Models\Transaction.cs" />
-    <Compile Include="Models\BalancedRule.cs" />
-    <Compile Include="Models\ActorData.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BittrexCore\BittrexCore.csproj">
+      <Project>{96cfd74b-e4b7-4ae5-b6f6-314f0b3783c1}</Project>
+      <Name>BittrexCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DataManagement\DataManagement.csproj">
+      <Project>{f48699a7-1dcf-4e46-8e9b-2679754ccdd9}</Project>
+      <Name>DataManagement</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RulesLibrary\RulesLibrary.csproj">
+      <Project>{b376a0e8-7b0d-4ba3-98d5-f4db347ff08b}</Project>
+      <Name>RulesLibrary</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

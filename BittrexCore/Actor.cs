@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BittrexCore
 {
-    public class ActorManager
+    public class Actor
     {
     }
 }

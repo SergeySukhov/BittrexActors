@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{96CFD74B-E4B7-4AE5-B6F6-314F0B3783C1}</ProjectGuid>
+    <ProjectGuid>{F48699A7-1DCF-4E46-8E9B-2679754CCDD9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BittrexCore</RootNamespace>
-    <AssemblyName>BittrexCore</AssemblyName>
+    <RootNamespace>DataManagement</RootNamespace>
+    <AssemblyName>DataManagement</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -39,16 +39,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ActorFactory.cs" />
-    <Compile Include="ActorManager.cs" />
-    <Compile Include="Actor.cs" />
-    <Compile Include="Models\Account.cs" />
-    <Compile Include="Const.cs" />
-    <Compile Include="Enums.cs" />
-    <Compile Include="Models\Prediction.cs" />
-    <Compile Include="Models\Transaction.cs" />
-    <Compile Include="Models\BalancedRule.cs" />
-    <Compile Include="Models\ActorData.cs" />
+    <Compile Include="ActorProvider.cs" />
+    <Compile Include="CurrencyProvider.cs" />
+    <Compile Include="Interfaces\IActorProvider.cs" />
+    <Compile Include="Interfaces\ICurrencyProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

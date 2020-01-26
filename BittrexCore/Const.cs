@@ -5,7 +5,8 @@ using System.Text;
 
 namespace BittrexCore
 {
-    public class ActorManager
+    public static class Const
     {
+        public static readonly string ApiKey = "";
     }
 }
