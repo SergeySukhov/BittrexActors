@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RulesLibrary;
 
-namespace BittrexCoreConsole
+namespace BittrexConsole
 {
     class Program
     {
@@ -13,7 +9,8 @@ namespace BittrexCoreConsole
             Console.WriteLine("!! Hello, start initialization...");
 
             RulesLibrary.RulesLibrary r = new RulesLibrary.RulesLibrary();
-            
+
+            Console.ReadKey();
         }
     }
 }

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace DataManagement
+namespace BittrexData.Interfaces
 {
-    class CurrencyProvider
+    public interface ICurrencyProvider
     {
     }
 }
