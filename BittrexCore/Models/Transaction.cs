@@ -9,6 +9,7 @@ namespace BittrexCore.Models
     {
         
         public Guid Guid;
+
         public OperationType Type;
         public DateTime Time;
         public TransactionResult TransactionResult;

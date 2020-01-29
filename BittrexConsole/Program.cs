@@ -10,7 +10,14 @@ namespace BittrexConsole
 
             RulesLibrary.RulesLibrary r = new RulesLibrary.RulesLibrary();
 
-            Console.ReadKey();
+
+
+
+
+
+
+
+			Console.ReadKey();
         }
     }
 }
