@@ -7,7 +7,6 @@ namespace BittrexCore.Models
 {
     public class BalancedRule
     {
-        public Guid Guid;
         public string RuleName;
         public OperationType Type;
     }

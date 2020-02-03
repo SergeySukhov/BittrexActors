@@ -7,7 +7,6 @@ namespace BittrexCore.Models
 {
     public class Transaction
     {
-        
         public Guid Guid;
 
         public OperationType Type;

@@ -5,7 +5,6 @@ using System.Text;
 
 namespace BittrexData
 {
-    public class ActorProvider
-    {
-    }
+       public enum OperationType { Sell, Buy }
+       public enum TransactionResult { Success, Failed, Error }
 }

@@ -10,13 +10,15 @@ namespace BittrexConsole
 
             RulesLibrary.RulesLibrary r = new RulesLibrary.RulesLibrary();
 
+			var dataManager = new BittrexData.DataManager();
+
+			dataManager.actorProvider.TestAddingData();
+			dataManager.actorProvider.TestLoadingData();
 
 
 
 
-
-
-
+			Console.WriteLine("Finished!!");
 			Console.ReadKey();
         }
     }

@@ -7,7 +7,7 @@ namespace BittrexCore.Models
 {
     public class Account
     {
-        public string CurrencyName;
+		public string CurrencyName;
         public decimal BtcCount;
         public decimal CurrencyCount;
     }

@@ -7,7 +7,6 @@ namespace BittrexCore.Models
 {
     public class ActorData
     {
-        public Guid Guid;
         public List<BalancedRule> Rules;
         public List<Prediction> Predictions;
 

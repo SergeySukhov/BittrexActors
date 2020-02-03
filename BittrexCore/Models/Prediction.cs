@@ -7,8 +7,6 @@ namespace BittrexCore.Models
 {
     public class Prediction
     {
-        public Guid Guid;
-        public List<KeyValuePair<BalancedRule, double>> RulePredictions;
-
+        public Dictionary<string, double> RulePredictions;
     }
 }
