@@ -12,10 +12,10 @@ namespace BittrexConsole
 
 			var dataManager = new BittrexData.DataManager();
 
-			dataManager.actorProvider.TestAddingData();
-			dataManager.actorProvider.TestLoadingData();
+			//dataManager.actorProvider.TestAddingData();
+			//dataManager.actorProvider.TestLoadingData();
 
-
+			dataManager.actorProvider.TestSaving();
 
 
 			Console.WriteLine("Finished!!");
