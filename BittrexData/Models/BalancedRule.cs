@@ -11,9 +11,13 @@ namespace BittrexData.Models
 		[Key]
 		public Guid Guid { get; set; }
 
-		public virtual ActorData ActorData { get; set; } 
-
+        [Required]
 		public string RuleName { get; set; }
-		public OperationType Type { get; set; }
-	}
+
+        [Required]
+        public OperationType Type { get; set; }
+
+        public virtual ActorData ActorData { get; set; }
+
+    }
 }

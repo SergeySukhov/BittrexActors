@@ -32,6 +32,8 @@ namespace BittrexData.Models
 		[Required]
 		public ActorType ActorType { get; set; }
 
+        public virtual Account Account { get; set; }
+
 		public virtual ICollection<BalancedRule> Rules { get; set; }
 		public virtual ICollection<Prediction> Predictions { get; set; }
 		public virtual ICollection<Transaction> Transactions { get; set; }

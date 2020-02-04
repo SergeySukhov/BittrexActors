@@ -15,5 +15,8 @@ namespace BittrexData.Models
 
 		[Required]
 		public double Coefficient { get; set; }
-	}
+
+        public virtual Prediction Prediction { get; set; }
+
+    }
 }

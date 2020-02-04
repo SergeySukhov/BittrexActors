@@ -28,6 +28,11 @@ namespace BittrexData.Contexts
 			modelBuilder.Entity<Transaction>().Property(x => x.BtcCount).HasColumnType("decimal(16,8)");
 			modelBuilder.Entity<Transaction>().Property(x => x.CurrencyPrice).HasColumnType("decimal(16,8)");
 
+            modelBuilder.Entity<BalancedRule>().HasOne(a => a.ActorData).WithMany(aa => aa.Rules).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Transaction>().HasOne(a => a.ActorData).WithMany(aa => aa.Transactions).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Prediction>().HasOne(a => a.ActorData).WithMany(aa => aa.Predictions).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Account>().HasOne(a => a.ActorData).WithOne(aa => aa.Account).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<PredictionUnit>().HasOne(a => a.Prediction).WithMany(aa => aa.RulePredictions).OnDelete(DeleteBehavior.Cascade);
 		}
 				
 		

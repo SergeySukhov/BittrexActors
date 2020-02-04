@@ -48,17 +48,25 @@ namespace BittrexData.Providers
 
 			var a = new ActorData();
 			a.Rules = new List<BalancedRule>();
-
-			a.Guid = Guid.Parse("bcd02af5-620b-446a-87bb-7c4eea949bc7");
+            a.Predictions = new List<Prediction>();
+			a.Guid = Guid.Parse("23E43272-E7F3-4DAA-B9F3-2A682B7DF8A3");
 			a.HesitationToBuy = 2;
 			a.HesitationToSell = 2.0222222d;
 			a.IsAlive = true;
 
-			a.Rules.Add(new BalancedRule() { Guid = Guid.NewGuid(), RuleName = "hui2", Type = OperationType.Buy });
+            var rule = new BalancedRule() { Guid = Guid.Parse("23E43272-E7F3-4DAA-B9F3-2A682B7DF8A4"), RuleName = "hui333", Type = OperationType.Buy };
+            var predU = new PredictionUnit() { Guid = Guid.NewGuid(), RuleName = rule.RuleName, Coefficient = 0.22d };
+            var preds = new Prediction() { Guid = Guid.NewGuid(), RulePredictions = new List<PredictionUnit>() { predU } };
+
+            a.Predictions.Add(preds);
+			a.Rules.Add(rule);
 
 			this.SaveOrUpdateActor(a);
 
 			var alives = this.LoadAliveActors();
+
+            context.Dispose();
+
 			Console.WriteLine(alives.Count);
 			// context.ActorDatas.Add(a);
 		}
@@ -70,20 +78,24 @@ namespace BittrexData.Providers
 			try
 			{
 
-				var savedData = context.ActorDatas.Where(actor => actor.Guid == actorData.Guid).Include(x => x.Rules).FirstOrDefault();
+				var savedData = context.ActorDatas.Where(actor => actor.Guid == actorData.Guid)
+                    .Include(x => x.Rules)
+                    .Include(x => x.Transactions)
+                    .Include(x => x.Account)
+                    .Include(x => x.Predictions)
+                    .FirstOrDefault();
 
 				if (savedData == null)
 				{
-					context.ActorDatas.Add(savedData);
-					context.SaveChanges();
+					context.ActorDatas.Add(actorData);
 				} else
 				{
+                    
 					context.ActorDatas.Remove(savedData);
 					context.ActorDatas.Add(actorData);
-					context.SaveChanges();
 				}
-
-				context.Dispose();
+                context.SaveChanges();
+                context.Dispose();
 				return true;
 			}
 			catch (Exception ex)
@@ -99,7 +111,12 @@ namespace BittrexData.Providers
 		{
 			var context = new BittrexActorsDbContext();
 
-			var aliveActors = context.ActorDatas.Where(actor => actor.IsAlive).Include(x => x.Rules).ToList();
+			var aliveActors = context.ActorDatas.Where(actor => actor.IsAlive)
+                .Include(x => x.Rules)
+                .Include(x => x.Account)
+                .Include(x => x.Transactions)
+                .Include(x => x.Predictions)
+                .ToList();
 			context.Dispose();
 
 			return aliveActors;

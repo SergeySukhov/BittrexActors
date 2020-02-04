@@ -25,5 +25,8 @@ namespace BittrexData.Models
 
 		[Required]
 		public TransactionResult TransactionResult { get; set; }
+
+        public virtual ActorData ActorData { get; set; }
+
     }
 }
