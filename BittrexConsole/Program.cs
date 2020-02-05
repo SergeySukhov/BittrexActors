@@ -15,7 +15,7 @@ namespace BittrexConsole
 			//dataManager.actorProvider.TestAddingData();
 			//dataManager.actorProvider.TestLoadingData();
 
-			dataManager.actorProvider.TestSaving();
+			dataManager.ActorProvider.TestSaving();
 
 
 			Console.WriteLine("Finished!!");

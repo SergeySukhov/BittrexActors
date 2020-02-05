@@ -77,7 +77,6 @@ namespace BittrexData.Providers
 
 			try
 			{
-
 				var savedData = context.ActorDatas.Where(actor => actor.Guid == actorData.Guid)
                     .Include(x => x.Rules)
                     .Include(x => x.Transactions)
@@ -90,7 +89,6 @@ namespace BittrexData.Providers
 					context.ActorDatas.Add(actorData);
 				} else
 				{
-                    
 					context.ActorDatas.Remove(savedData);
 					context.ActorDatas.Add(actorData);
 				}
@@ -117,6 +115,7 @@ namespace BittrexData.Providers
                 .Include(x => x.Transactions)
                 .Include(x => x.Predictions)
                 .ToList();
+
 			context.Dispose();
 
 			return aliveActors;
