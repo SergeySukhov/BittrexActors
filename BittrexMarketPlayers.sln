@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.1000
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BittrexConsole", "BittrexConsole\BittrexConsole.csproj", "{6DF45A7F-EEB1-45C9-A777-81A7A44D2C49}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BittrexConsole", "BittrexConsole\BittrexConsole.csproj", "{6DF45A7F-EEB1-45C9-A777-81A7A44D2C49}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BittrexCore", "BittrexCore\BittrexCore.csproj", "{4EE4DE21-FCDE-469C-87A3-5D56058C5A99}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BittrexCore", "BittrexCore\BittrexCore.csproj", "{4EE4DE21-FCDE-469C-87A3-5D56058C5A99}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BittrexData", "BittrexData\BittrexData.csproj", "{DAC1BFA7-1F73-4404-8FD2-B49B4E412692}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BittrexData", "BittrexData\BittrexData.csproj", "{DAC1BFA7-1F73-4404-8FD2-B49B4E412692}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RulesLibrary", "RulesLibrary\RulesLibrary.csproj", "{5668669F-538E-40E2-80C8-C3B0246E5101}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RulesLibrary", "RulesLibrary\RulesLibrary.csproj", "{5668669F-538E-40E2-80C8-C3B0246E5101}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

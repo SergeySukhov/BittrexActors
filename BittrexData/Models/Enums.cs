@@ -8,5 +8,5 @@ namespace BittrexData
 	public enum OperationType { Sell, Buy }
 	public enum TransactionResult { Success, Failed, Error }
 
-	public enum ActorType { HalfDaily, Daily, Weekly }
+    public enum ActorType { HalfDaily, Daily, Weekly }
 }

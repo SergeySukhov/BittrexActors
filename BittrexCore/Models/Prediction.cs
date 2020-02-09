@@ -7,6 +7,16 @@ namespace BittrexCore.Models
 {
     public class Prediction
     {
-        public Dictionary<string, double> RulePredictions;
+        public Guid Guid;
+        public DateTime ForTime;
+        public decimal OldPrice;
+        public readonly Dictionary<string, double> RulePredictions;
+
+        public Prediction()
+        {
+            Guid = Guid.NewGuid();
+
+            RulePredictions = new Dictionary<string, double>();
+        }
     }
 }

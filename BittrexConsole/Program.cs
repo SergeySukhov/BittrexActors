@@ -1,5 +1,5 @@
 ﻿using System;
-
+using RulesLibrary;
 namespace BittrexConsole
 {
     class Program
@@ -8,14 +8,14 @@ namespace BittrexConsole
         {
             Console.WriteLine("!! Hello, start initialization...");
 
-            RulesLibrary.RulesLibrary r = new RulesLibrary.RulesLibrary();
+            RuleLibrary r = new RuleLibrary();
 
 			var dataManager = new BittrexData.DataManager();
 
-			//dataManager.actorProvider.TestAddingData();
-			//dataManager.actorProvider.TestLoadingData();
+            //dataManager.actorProvider.TestAddingData();
+            //dataManager.actorProvider.TestLoadingData();
 
-			dataManager.ActorProvider.TestSaving();
+            //dataManager.ActorProvider.TestSaving();
 
 
 			Console.WriteLine("Finished!!");

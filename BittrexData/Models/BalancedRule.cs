@@ -15,6 +15,9 @@ namespace BittrexData.Models
 		public string RuleName { get; set; }
 
         [Required]
+        public double Coefficient { get; set; }
+
+        [Required]
         public OperationType Type { get; set; }
 
         public virtual ActorData ActorData { get; set; }

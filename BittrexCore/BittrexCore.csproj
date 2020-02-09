@@ -5,8 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Models\" />
     <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BittrexData\BittrexData.csproj" />
+    <ProjectReference Include="..\RulesLibrary\RulesLibrary.csproj" />
   </ItemGroup>
 
 </Project>

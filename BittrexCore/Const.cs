@@ -8,5 +8,6 @@ namespace BittrexCore
     public static class Const
     {
         public static readonly string ApiKey = "";
+        public static readonly decimal TransactionSumBtc = 0.0001m;
     }
 }

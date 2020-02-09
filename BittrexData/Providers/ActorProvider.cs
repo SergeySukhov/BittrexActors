@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Threading.Tasks;
 using BittrexData.Contexts;
 using BittrexData.Models; // !!
 using Microsoft.EntityFrameworkCore;
@@ -44,7 +44,6 @@ namespace BittrexData.Providers
 
 		public void TestSaving()
 		{
-			var context = new BittrexActorsDbContext();
 
 			var a = new ActorData();
 			a.Rules = new List<BalancedRule>();
@@ -61,17 +60,17 @@ namespace BittrexData.Providers
             a.Predictions.Add(preds);
 			a.Rules.Add(rule);
 
-			this.SaveOrUpdateActor(a);
+			this.SaveOrUpdateActor(a).Wait();
 
-			var alives = this.LoadAliveActors();
+			var alives = this.LoadAliveActors().Result;
 
-            context.Dispose();
 
-			Console.WriteLine(alives.Count);
+
+            Console.WriteLine(alives.Count);
 			// context.ActorDatas.Add(a);
 		}
 
-		private bool SaveOrUpdateActor(ActorData actorData)
+		private async Task<bool> SaveOrUpdateActor(ActorData actorData)
 		{
 			var context = new BittrexActorsDbContext();
 
@@ -92,8 +91,8 @@ namespace BittrexData.Providers
 					context.ActorDatas.Remove(savedData);
 					context.ActorDatas.Add(actorData);
 				}
-                context.SaveChanges();
-                context.Dispose();
+                await context.SaveChangesAsync();
+                await context.DisposeAsync();
 				return true;
 			}
 			catch (Exception ex)
@@ -105,7 +104,7 @@ namespace BittrexData.Providers
 
 		} 
 
-		private List<ActorData> LoadAliveActors()
+		public async Task<List<ActorData>> LoadAliveActors()
 		{
 			var context = new BittrexActorsDbContext();
 
@@ -116,7 +115,7 @@ namespace BittrexData.Providers
                 .Include(x => x.Predictions)
                 .ToList();
 
-			context.Dispose();
+			await context.DisposeAsync();
 
 			return aliveActors;
 		}
