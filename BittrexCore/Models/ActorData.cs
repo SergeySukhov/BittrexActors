@@ -11,9 +11,13 @@ namespace BittrexCore.Models
         public double HesitationToBuy;
         public double HesitationToSell;
         public double ChangeCoefficient;
-        public bool IsAlive;
 
-        public ActorType ActorType;
+		public int Generation;
+		public bool IsAlive;
+
+		public DateTime LastActionTime;
+
+		public ActorType ActorType;
 
         public Account Account; 
         public readonly List<BalancedRule> Rules;

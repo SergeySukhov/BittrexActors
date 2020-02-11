@@ -66,8 +66,8 @@ namespace BittrexCore
                 var ruleCoef = RuleLibrary.RulesBuyDictionary[rule.RuleName](CurrencyProvider, CurrentTime);
 
                 prediction.RulePredictions.Add(rule.RuleName, ruleCoef);
-                result *= rule.Coefficient * ruleCoef;
-            }
+                result += rule.Coefficient * ruleCoef; //  > 0.5 - рекомендует, < 0.5 - не рекомендует, = 0 - не смог дать результат
+			}
 
             Data.Predictions.Add(prediction);
 
@@ -92,7 +92,7 @@ namespace BittrexCore
 
                 var ruleCoef = RuleLibrary.RulesSellDictionary[rule.RuleName](CurrencyProvider, CurrentTime);
                 prediction.RulePredictions.Add(rule.RuleName, ruleCoef);
-                result += rule.Coefficient * ruleCoef; //  > 1 - рекомендует, < 1 - не рекомендует
+                result += rule.Coefficient * ruleCoef; //  > 1 - рекомендует, < 1 - не рекомендует, = 0 - не смог дать результат
             }
 
             Data.Predictions.Add(prediction);
@@ -109,52 +109,39 @@ namespace BittrexCore
 
         private void Inspect()
         {
-            
+			// проверка предсказаний
+			foreach (var predictionsForTime in Data.Predictions) // проходим по всем предсказаниям
+			{
+				if (CurrentTime - predictionsForTime.ForTime > new TimeSpan(1, 30, 0) || predictionsForTime.ForTime - CurrentTime > new TimeSpan(1, 30, 0)) continue;
 
-            foreach (var predictionsForTime in Data.Predictions)
-            {
-                if (CurrentTime - predictionsForTime.ForTime > new TimeSpan(1, 30, 0) || predictionsForTime.ForTime - CurrentTime > new TimeSpan(1, 30, 0)) continue;
+				var curPrice = CurrencyProvider.FindClosetPrice(predictionsForTime.ForTime, Data.Account.CurrencyName);
+				if (curPrice <= 0) continue;
 
-                var curPrice = CurrencyProvider.FindClosetPrice(predictionsForTime.ForTime, Data.Account.CurrencyName);
-                if (curPrice <= 0) continue;
+				foreach (var unitPrediction in predictionsForTime.RulePredictions) // проходим по всем правилам в предсказании
+				{
+					var rule = Data.Rules.First(r => r.RuleName == unitPrediction.Key);
+					if (rule == null || unitPrediction.Value == 0) continue;
 
-                foreach (var unitPrediction in predictionsForTime.RulePredictions)
-                {
-                    
-                    // добавить градации
-                    if (curPrice > predictionsForTime.OldPrice)
-                    {
-                        if (unitPrediction.Value > 1)
-                        {
-                            var rule = Data.Rules.First(r => r.RuleName == unitPrediction.Key);
-                            if (rule != null) rule.Coefficient += rule.Coefficient * 0.3; // TODO: вынести
-                        }
+					// добавить градации
+					if (curPrice >= predictionsForTime.OldPrice && unitPrediction.Value >= 1 ||
+						curPrice <= predictionsForTime.OldPrice && unitPrediction.Value <= 1)
+					{
+						rule.Coefficient += rule.Coefficient * Const.RuleChangeCoef + Const.RuleChangeCoef;
+					}
 
-                        if (unitPrediction.Value < 1)
-                        {
-                            var rule = Data.Rules.First(r => r.RuleName == unitPrediction.Key);
-                            if (rule != null) rule.Coefficient -= rule.Coefficient * 0.3; // TODO: вынести
-                        }
+					if (curPrice < predictionsForTime.OldPrice && unitPrediction.Value > 1 ||
+						curPrice < predictionsForTime.OldPrice && unitPrediction.Value > 1)
+					{
+						rule.Coefficient -= rule.Coefficient * Const.RuleChangeCoef + Const.RuleChangeCoef;
+					}
 
-                    }
-                    else
-                    {
-                        if (unitPrediction.Value > 1)
-                        {
-                            var rule = Data.Rules.First(r => r.RuleName == unitPrediction.Key);
-                            if (rule != null) rule.Coefficient -= rule.Coefficient * 0.3; // TODO: вынести
-                        }
+					rule.Coefficient = 1d / (1d + Math.Exp(-rule.Coefficient)); // есть функции получше
+				}
+			}
 
-                        if (unitPrediction.Value < 1)
-                        {
-                            var rule = Data.Rules.First(r => r.RuleName == unitPrediction.Key);
-                            if (rule != null) rule.Coefficient += rule.Coefficient * 0.3; // TODO: вынести
-                        }
-                    }
-                   
+			// проверка транзакций
+			//...
 
-                }
-            }
         }
 
         private void Save()

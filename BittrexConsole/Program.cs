@@ -1,5 +1,8 @@
 ﻿using System;
+
 using RulesLibrary;
+using BittrexData;
+
 namespace BittrexConsole
 {
     class Program
@@ -10,7 +13,7 @@ namespace BittrexConsole
 
             RuleLibrary r = new RuleLibrary();
 
-			var dataManager = new BittrexData.DataManager();
+			var dataManager = new DataManager();
 
             //dataManager.actorProvider.TestAddingData();
             //dataManager.actorProvider.TestLoadingData();

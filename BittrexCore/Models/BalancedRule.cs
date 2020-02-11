@@ -10,6 +10,9 @@ namespace BittrexCore.Models
     {
         public Guid Guid;
         public string RuleName;
+		/// <summary>
+		/// (0,1)
+		/// </summary>
         public double Coefficient;
         public OperationType Type;
 

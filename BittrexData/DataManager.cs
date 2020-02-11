@@ -9,8 +9,8 @@ namespace BittrexData
 	{
 
 		public readonly ActorProvider ActorProvider;
-
 		public readonly CurrencyProvider CurrencyProvider;
+
 		public DataManager()
 		{
 			this.ActorProvider = new ActorProvider();

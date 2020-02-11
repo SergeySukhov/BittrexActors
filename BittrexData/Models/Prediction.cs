@@ -14,8 +14,10 @@ namespace BittrexData.Models
         [Required]
         public DateTime ForTime { get; set; }
 
+		[Required]
+		public decimal OldPrice { get; set; }
 
-        public virtual ActorData ActorData { get; set; }
+		public virtual ActorData ActorData { get; set; }
 
         public virtual ICollection<PredictionUnit> RulePredictions { get; set; }
 
