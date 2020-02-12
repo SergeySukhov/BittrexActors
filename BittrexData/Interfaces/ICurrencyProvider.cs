@@ -7,6 +7,6 @@ namespace BittrexData.Interfaces
 {
     public interface ICurrencyProvider
     {
-        decimal FindClosetPrice(DateTime dateTime, string currencyName);
+        decimal FindPriceByTime(DateTime dateTime, string currencyName);
     }
 }

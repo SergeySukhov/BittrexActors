@@ -12,5 +12,10 @@ namespace BittrexCore.Models
 		public string CurrencyName;
         public decimal BtcCount;
         public decimal CurrencyCount;
+
+		public Account()
+		{
+			Guid = Guid.NewGuid();
+		}
     }
 }

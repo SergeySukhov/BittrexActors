@@ -10,14 +10,19 @@ namespace BittrexData.Providers
     public class CurrencyProvider : ICurrencyProvider
     {
 
-        public decimal FindClosetPrice(DateTime dateTime, string currencyName)
+        public decimal FindPriceByTime(DateTime dateTime, string currencyName)
         {
             var context = new BittrexCurrencyDbContext();
+			// TODO: выбрать лучший из вариантов
+			var resultCur = context.CurrencyDatas
+							.Where(x => x.CurrencyName == currencyName &&
+										x.DateTime.Date == dateTime.Date &&
+										x.DateTime.Hour == dateTime.Hour)
+							.FirstOrDefault();
 
-            var resultCur = context.CurrencyDatas.Where(x => x.CurrencyName == currencyName && x.DateTime - dateTime < new TimeSpan(0, 30, 0)).FirstOrDefault();
-
-            if (resultCur == null) return -1m;
-            else return resultCur.BuyPrice;
+            if (resultCur == null) return -1.0m;
+            else
+				return resultCur.BuyPrice; // !!
         }
     }
 }

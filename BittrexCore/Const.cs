@@ -9,6 +9,7 @@ namespace BittrexCore
     {
         public static readonly string ApiKey = "";
         public static readonly decimal TransactionSumBtc = 0.0001m;
+        public static readonly decimal TransactionSumBtcCommision = 0.000001m;
 		public static readonly double RuleChangeCoef = 0.1;
     }
 }
