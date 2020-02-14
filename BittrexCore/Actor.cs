@@ -174,7 +174,7 @@ namespace BittrexCore
 					if (curPrice < predictionsForTime.OldPrice && unitPrediction.Value > 0 ||
 						curPrice > predictionsForTime.OldPrice && unitPrediction.Value < 0)
 					{
-						rule.Coefficient -= rule.Coefficient * Const.RuleChangeCoef + Const.RuleChangeCoef;
+						rule.Coefficient -= rule.Coefficient * Const.RuleChangeCoef + Const.RuleChangeCoef; // TODO: зависимость от значения
 					}
 
 					//rule.Coefficient = 1d / (1d + Math.Exp(-rule.Coefficient)); // (0,1) //  есть функции получше
@@ -198,6 +198,14 @@ namespace BittrexCore
 
         ////////////////////////// вспомогательные функции
 
-        
-    }
+        private double Exponenta01(double x)
+		{
+			return Math.Pow(1d + Math.Exp(-x), -1d);
+		}
+
+		private double ExponentaMinus11(double x)
+		{
+			return (Math.Exp(2d*x) - 1d)/ (Math.Exp(2d*x) + 1d);
+		}
+	}
 }

@@ -28,8 +28,16 @@ namespace BittrexCore.Models
 
         public void CommitTransaction(Account account, decimal sumBtc, OperationType operationType, DateTime transactionTime, ICurrencyProvider provider)
         {
-			var curPrice = provider.FindPriceByTime(transactionTime, account.CurrencyName);
-			
+			// TODO: вынести в конструктор
+			Time = transactionTime;
+			Type = operationType;
+			BtcCount = sumBtc;
+			CurrencyPrice = provider.FindPriceByTime(transactionTime, account.CurrencyName);
+			if (CurrencyPrice <= 0)
+			{
+				this.TransactionResult = TransactionResult.Failed;
+				return;
+			} 
 			if (operationType == OperationType.Buy)
 			{
 				if (account.BtcCount - sumBtc + Const.TransactionSumBtcCommision < 0)
@@ -38,21 +46,21 @@ namespace BittrexCore.Models
 					return;
 				}
 				account.BtcCount -= sumBtc + Const.TransactionSumBtcCommision;
-				account.CurrencyCount += sumBtc / curPrice;
+				account.CurrencyCount += sumBtc / CurrencyPrice;
 			} else if (operationType == OperationType.Sell)
 			{
-				if (account.CurrencyCount - (sumBtc + Const.TransactionSumBtcCommision) / curPrice < 0)
+				if (account.CurrencyCount - (sumBtc + Const.TransactionSumBtcCommision) / CurrencyPrice < 0)
 				{
 					TransactionResult = TransactionResult.Failed;
 					return;
 				}
-				account.CurrencyCount -= sumBtc / curPrice;
+				account.CurrencyCount -= sumBtc / CurrencyPrice;
 				account.BtcCount += sumBtc - Const.TransactionSumBtcCommision;
 			} else
 			{
-				throw new Exception("Непонятная операция!");
+				this.TransactionResult = TransactionResult.Error;
 			}
-			
+			TransactionResult = TransactionResult.Success;
 
         }
     }
