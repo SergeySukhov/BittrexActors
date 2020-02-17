@@ -11,11 +11,11 @@ namespace BittrexConsole
 {
     class Program
     {
-        static void Main(string[] args)
-        {
-            Console.WriteLine("!! Hello, start initialization...");
+		static void Main(string[] args)
+		{
+			Console.WriteLine("!! Hello, start initialization...");
 
-            RuleLibrary r = new RuleLibrary();
+			RuleLibrary r = new RuleLibrary();
 
 			var dataManager = new DataManager();
 
@@ -45,6 +45,10 @@ namespace BittrexConsole
 			actor.Data.Rules.Add(new BalancedRule("rule0", OperationType.Buy) { Guid = Guid.NewGuid(), Coefficient = 0.5 }); // поменять строки на enum
 			actor.Data.Rules.Add(new BalancedRule("rule1", OperationType.Buy) { Guid = Guid.NewGuid(), Coefficient = 0.5 });
 			actor.Data.Rules.Add(new BalancedRule("rule2", OperationType.Buy) { Guid = Guid.NewGuid(), Coefficient = 0.5 });
+
+			actor.Data.Rules.Add(new BalancedRule("ruleSell0", OperationType.Sell) { Guid = Guid.NewGuid(), Coefficient = 0.4 });
+			actor.Data.Rules.Add(new BalancedRule("ruleSell1", OperationType.Sell) { Guid = Guid.NewGuid(), Coefficient = 0.4 });
+			actor.Data.Rules.Add(new BalancedRule("ruleSell2", OperationType.Sell) { Guid = Guid.NewGuid(), Coefficient = 0.4 });
 
 			actor.Data.Generation = 0;
 

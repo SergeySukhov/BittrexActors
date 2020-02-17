@@ -60,14 +60,16 @@ namespace BittrexCore
 			Inspect();
 
 			Save();
-
-
+			
 
 			if (Data.Account.CurrencyCount < 0.00005m && Data.Account.BtcCount < 0.00005m) Data.IsAlive = false;
 		}
 
 		public string GetInfo()
 		{
+			var price = CurrencyProvider.FindPriceByTime(CurrentTime, Data.Account.CurrencyName);
+			var estimatePrice = Data.Account.BtcCount + Data.Account.CurrencyCount * price;
+
 			return $"Актер: {Data.Guid}" + Environment.NewLine +
 					$"Счет: {Data.Account.BtcCount}BTC" + Environment.NewLine +
 					$"Счет валюты: {Data.Account.CurrencyCount}{Data.Account.CurrencyName}" + Environment.NewLine +
@@ -77,7 +79,8 @@ namespace BittrexCore
 					$"Сомнения продажи: {Data.HesitationToSell}" + Environment.NewLine +
 					$"Тип: {Data.ActorType}" + Environment.NewLine +
 					$"Количество предсказаний: {Data.Predictions.Count}" + Environment.NewLine +
-					$"Количество транзакций: {Data.Transactions.Count}" + Environment.NewLine;
+					$"Количество транзакций: {Data.Transactions.Count}" + Environment.NewLine +
+					$"Оценочное состояние: {estimatePrice}" + Environment.NewLine;
 		}
 
         private double ShouldBuy()
@@ -89,7 +92,7 @@ namespace BittrexCore
 
             prediction.ForTime = CurrentTime;
             prediction.OldPrice = CurrencyProvider.FindPriceByTime(CurrentTime, Data.Account.CurrencyName) + Const.TransactionSumBtcCommision; // цена + процент за проведение транзакции
-			if (prediction.OldPrice < 0) return 0;
+			if (prediction.OldPrice <= 0) return 0;
 
 			if (Data.ActorType == ActorType.HalfDaily) prediction.ForTime += new TimeSpan(6, 0, 0);
             else if (Data.ActorType == ActorType.Daily) prediction.ForTime += new TimeSpan(12, 0, 0);
@@ -121,7 +124,7 @@ namespace BittrexCore
             prediction.ForTime = CurrentTime;
 			prediction.OldPrice = CurrencyProvider.FindPriceByTime(CurrentTime, Data.Account.CurrencyName) + Const.TransactionSumBtcCommision; // цена + процент за проведение транзакции
 
-			if (prediction.OldPrice < 0) return 0;
+			if (prediction.OldPrice <= 0) return 0;
 
 			if (Data.ActorType == ActorType.HalfDaily) prediction.ForTime += new TimeSpan(6, 0, 0);
             else if (Data.ActorType == ActorType.Daily) prediction.ForTime += new TimeSpan(12, 0, 0);
@@ -132,7 +135,9 @@ namespace BittrexCore
                 if (!RuleLibrary.RulesSellDictionary.ContainsKey(rule.RuleName)) continue; // TODO: логирование
 
                 var ruleCoef = RuleLibrary.RulesSellDictionary[rule.RuleName](CurrencyProvider, CurrentTime);
+
                 prediction.RulePredictions.Add(rule.RuleName, ruleCoef);
+
                 result += rule.Coefficient * ruleCoef; // > 0 - рекомендует, < 0 - не рекомендует, = 0 - не смог дать результат
 			}
 
@@ -168,16 +173,16 @@ namespace BittrexCore
 					if (curPrice >= predictionsForTime.OldPrice && unitPrediction.Value > 0 ||
 						curPrice <= predictionsForTime.OldPrice && unitPrediction.Value < 0)
 					{
-						rule.Coefficient += rule.Coefficient * Const.RuleChangeCoef + Const.RuleChangeCoef;
+						rule.Coefficient += ChangeRuleCoef(rule.Coefficient, unitPrediction.Value);
 					}
 
 					if (curPrice < predictionsForTime.OldPrice && unitPrediction.Value > 0 ||
 						curPrice > predictionsForTime.OldPrice && unitPrediction.Value < 0)
 					{
-						rule.Coefficient -= rule.Coefficient * Const.RuleChangeCoef + Const.RuleChangeCoef; // TODO: зависимость от значения
+						rule.Coefficient -= ChangeRuleCoef(rule.Coefficient, unitPrediction.Value);
 					}
 
-					//rule.Coefficient = 1d / (1d + Math.Exp(-rule.Coefficient)); // (0,1) //  есть функции получше
+					rule.Coefficient = 1d / (1d + Math.Exp(-6d*rule.Coefficient)); // (0,1) // избегаем увеличивающего коэффициента, сохранем линейность
 				}
 
 				predictionToDelete.Add(predictionsForTime);
@@ -205,7 +210,14 @@ namespace BittrexCore
 
 		private double ExponentaMinus11(double x)
 		{
-			return (Math.Exp(2d*x) - 1d)/ (Math.Exp(2d*x) + 1d);
+			return (Math.Exp(3d*x) - 1d)/ (Math.Exp(3d*x) + 1d);
+		}
+
+		private double ChangeRuleCoef(double currentCoefValue, double predictionValue)
+		{
+			if (predictionValue == 0) return 0;
+
+			return Const.RuleChangeCoef * predictionValue * ExponentaMinus11(currentCoefValue);
 		}
 	}
 }
