@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using AutoMapper;
 using BittrexCore.Models;
 using BittrexData.Interfaces;
 
@@ -38,13 +39,15 @@ namespace BittrexCore
 
         private ActorData DbActorToModel(BittrexData.Models.ActorData actorData)
         {
-            var actorDataModel = new ActorData();
+			var config = new MapperConfiguration(cfg => cfg.CreateMap<BittrexData.Models.ActorData, ActorData>());
+			var mapper = new Mapper(config);
 
-            return actorDataModel;
-        }
+			return mapper.Map<ActorData>(actorData);
+		}
 
         private BittrexData.Models.ActorData ActorToDbModel(Actor actor)
         {
+
             return null;
         }
     }

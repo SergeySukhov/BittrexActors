@@ -6,6 +6,8 @@ using BittrexCore;
 using BittrexCore.Models;
 using System.Threading.Tasks;
 using System.Threading;
+using AutoMapper;
+using System.Collections.Generic;
 
 namespace BittrexConsole
 {
@@ -18,11 +20,6 @@ namespace BittrexConsole
 			RuleLibrary r = new RuleLibrary();
 
 			var dataManager = new DataManager();
-
-			//dataManager.actorProvider.TestAddingData();
-			//dataManager.actorProvider.TestLoadingData();
-
-			//dataManager.ActorProvider.TestSaving();
 
 
 			var actor = new Actor(dataManager.CurrencyProvider, r);
@@ -54,13 +51,14 @@ namespace BittrexConsole
 
 			// actor.Data.
 
-			Task.Run(() => {
+			Task.Run(() =>
+			{
 				int i = 0;
-				while(actor.Data.IsAlive)
+				while (actor.Data.IsAlive)
 				{
 					actor.DoWork();
 
-					if (i%10 == 0) Console.WriteLine(actor.GetInfo());
+					if (i % 10 == 0) Console.WriteLine(actor.GetInfo());
 					actor.CurrentTime += new TimeSpan(1, 0, 0); // в обучающей модели
 
 					Thread.Sleep(600);
@@ -69,8 +67,34 @@ namespace BittrexConsole
 			});
 
 
+			//var config = new MapperConfiguration(cfg => {
+			//	cfg.CreateMap<Account, BittrexData.Models.Account>();
+			//	cfg.CreateMap<Transaction, BittrexData.Models.Transaction>();
+
+			//	cfg.CreateMap<ActorData, BittrexData.Models.ActorData>()
+			//	.ForMember(x => x.Account, x => x.MapFrom(m => m.Account))
+			//	.ForMember(x => x.Transactions, x => x.MapFrom(m => m.Transactions));
+
+
+			//	});
+			//var mapper = new Mapper(config);
+
+			//var dataDto = mapper.Map<BittrexData.Models.ActorData>(actor.Data);
+
+			// +
+			//var config = new MapperConfiguration(cfg => { cfg.CreateMap<Account, BittrexData.Models.Account>(); });
+			//var mapper = new Mapper(config);
+
+			//var accDto = mapper.Map<Account, BittrexData.Models.Account>(actor.Data.Account);
+
+			var config = new MapperConfiguration(cfg => { cfg.CreateMap<BalancedRule, BittrexData.Models.BalancedRule>(); });
+			var mapper = new Mapper(config);
+
+			var accDto = mapper.Map<List<BalancedRule>, List<BittrexData.Models.BalancedRule>>(actor.Data.Rules);
+
+
 			Console.WriteLine("Finished!!");
 			Console.ReadKey();
-        }
+		}
     }
 }

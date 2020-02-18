@@ -9,6 +9,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\BittrexData\BittrexData.csproj" />
     <ProjectReference Include="..\RulesLibrary\RulesLibrary.csproj" />
   </ItemGroup>
