@@ -16,14 +16,15 @@ namespace BittrexCore.Models
 		public bool IsAlive;
 
 		public DateTime LastActionTime;
+		public DateTime CurrentTime;
 
 		public ActorType ActorType;
 
         public Account Account; 
-        public readonly List<BalancedRule> Rules;
-        public readonly List<Prediction> Predictions;
+        public List<BalancedRule> Rules;
+        public List<Prediction> Predictions;
 
-        public readonly List<Transaction> Transactions;
+        public List<Transaction> Transactions;
 
         public ActorData()
         {

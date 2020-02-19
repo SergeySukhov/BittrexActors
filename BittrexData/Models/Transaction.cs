@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BittrexData.Models
 {
@@ -10,6 +11,9 @@ namespace BittrexData.Models
     {
 		[Key]
         public Guid Guid { get; set; }
+
+		[ForeignKey("ActorDataGuid")]
+		public Guid ActorDataGuid { get; set; }
 
 		[Required]
         public OperationType Type { get; set; }

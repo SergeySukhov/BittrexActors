@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 using BittrexCore.Models;
 using BittrexData;
@@ -13,11 +12,10 @@ namespace BittrexCore
     public class Actor
     {
         public readonly Guid Guid;
-        public DateTime CurrentTime;
-        public readonly ActorData Data;
+        public ActorData Data;
         public readonly ICurrencyProvider CurrencyProvider;
 
-        public RuleLibrary RuleLibrary;
+        public readonly RuleLibrary RuleLibrary;
 
         public Actor(ICurrencyProvider currencyProvider, RuleLibrary ruleLibrary)
         {
@@ -29,13 +27,14 @@ namespace BittrexCore
 
 		public void DoWork()
 		{
+			// TODO: вынести
 			if (!Data.IsAlive ||
-				CurrentTime - Data.LastActionTime > new TimeSpan(24, 0, 0) && Data.ActorType == ActorType.Daily ||
-				CurrentTime - Data.LastActionTime > new TimeSpan(12, 0, 0) && Data.ActorType == ActorType.HalfDaily ||
-				CurrentTime - Data.LastActionTime > new TimeSpan(24 * 7, 0, 0) && Data.ActorType == ActorType.Weekly)
+				Data.CurrentTime - Data.LastActionTime > new TimeSpan(24, 0, 0) && Data.ActorType == ActorType.Daily ||
+				Data.CurrentTime - Data.LastActionTime > new TimeSpan(12, 0, 0) && Data.ActorType == ActorType.HalfDaily ||
+				Data.CurrentTime - Data.LastActionTime > new TimeSpan(24 * 7, 0, 0) && Data.ActorType == ActorType.Weekly)
 				return;
 
-			Data.LastActionTime = CurrentTime;
+			Data.LastActionTime = Data.CurrentTime;
 
 			if (Data.HesitationToBuy < ShouldBuy())
 			{
@@ -67,14 +66,14 @@ namespace BittrexCore
 
 		public string GetInfo()
 		{
-			var price = CurrencyProvider.FindPriceByTime(CurrentTime, Data.Account.CurrencyName);
+			var price = CurrencyProvider.FindPriceByTime(Data.CurrentTime, Data.Account.CurrencyName);
 			var estimatePrice = Data.Account.BtcCount + Data.Account.CurrencyCount * price;
 
 			return $"Актер: {Data.Guid}" + Environment.NewLine +
 					$"Счет: {Data.Account.BtcCount}BTC" + Environment.NewLine +
 					$"Счет валюты: {Data.Account.CurrencyCount}{Data.Account.CurrencyName}" + Environment.NewLine +
 					$"Последнее время действия: {Data.LastActionTime}" + Environment.NewLine +
-					$"Текущее время: {CurrentTime}" + Environment.NewLine +
+					$"Текущее время: {Data.CurrentTime}" + Environment.NewLine +
 					$"Сомнения покупки: {Data.HesitationToBuy}" + Environment.NewLine +
 					$"Сомнения продажи: {Data.HesitationToSell}" + Environment.NewLine +
 					$"Тип: {Data.ActorType}" + Environment.NewLine +
@@ -90,8 +89,8 @@ namespace BittrexCore
 			// Вынести
             var prediction = new Prediction();
 
-            prediction.ForTime = CurrentTime;
-            prediction.OldPrice = CurrencyProvider.FindPriceByTime(CurrentTime, Data.Account.CurrencyName) + Const.TransactionSumBtcCommision; // цена + процент за проведение транзакции
+            prediction.ForTime = Data.CurrentTime;
+            prediction.OldPrice = CurrencyProvider.FindPriceByTime(Data.CurrentTime, Data.Account.CurrencyName) + Const.TransactionSumBtcCommision; // цена + процент за проведение транзакции
 			if (prediction.OldPrice <= 0) return 0;
 
 			if (Data.ActorType == ActorType.HalfDaily) prediction.ForTime += new TimeSpan(6, 0, 0);
@@ -104,7 +103,7 @@ namespace BittrexCore
                 
                 if (!RuleLibrary.RulesBuyDictionary.ContainsKey(rule.RuleName)) continue; // TODO: логирование
 
-                var ruleCoef = RuleLibrary.RulesBuyDictionary[rule.RuleName](CurrencyProvider, CurrentTime);
+                var ruleCoef = RuleLibrary.RulesBuyDictionary[rule.RuleName](CurrencyProvider, Data.CurrentTime);
 
                 prediction.RulePredictions.Add(rule.RuleName, ruleCoef);
                 result += rule.Coefficient * ruleCoef; // > 0 - рекомендует, < 0 - не рекомендует, = 0 - не смог дать результат
@@ -121,8 +120,8 @@ namespace BittrexCore
             var result = 0d;
             var prediction = new Prediction();
 
-            prediction.ForTime = CurrentTime;
-			prediction.OldPrice = CurrencyProvider.FindPriceByTime(CurrentTime, Data.Account.CurrencyName) + Const.TransactionSumBtcCommision; // цена + процент за проведение транзакции
+            prediction.ForTime = Data.CurrentTime;
+			prediction.OldPrice = CurrencyProvider.FindPriceByTime(Data.CurrentTime, Data.Account.CurrencyName) + Const.TransactionSumBtcCommision; // цена + процент за проведение транзакции
 
 			if (prediction.OldPrice <= 0) return 0;
 
@@ -134,7 +133,7 @@ namespace BittrexCore
             {
                 if (!RuleLibrary.RulesSellDictionary.ContainsKey(rule.RuleName)) continue; // TODO: логирование
 
-                var ruleCoef = RuleLibrary.RulesSellDictionary[rule.RuleName](CurrencyProvider, CurrentTime);
+                var ruleCoef = RuleLibrary.RulesSellDictionary[rule.RuleName](CurrencyProvider, Data.CurrentTime);
 
                 prediction.RulePredictions.Add(rule.RuleName, ruleCoef);
 
@@ -149,7 +148,7 @@ namespace BittrexCore
         private void CommitOperation(OperationType operationType)
         {
             var transaction = new Transaction();
-            transaction.CommitTransaction(Data.Account, Const.TransactionSumBtc, operationType, CurrentTime, CurrencyProvider);
+            transaction.CommitTransaction(Data.Account, Const.TransactionSumBtc, operationType, Data.CurrentTime, CurrencyProvider);
             Data.Transactions.Add(transaction);
         }
 
@@ -159,7 +158,7 @@ namespace BittrexCore
 			// проверка предсказаний
 			foreach (var predictionsForTime in Data.Predictions) // проходим по всем предсказаниям
 			{
-				if (CurrentTime - predictionsForTime.ForTime > new TimeSpan(1, 30, 0) || predictionsForTime.ForTime - CurrentTime > new TimeSpan(1, 30, 0)) continue;
+				if (Data.CurrentTime - predictionsForTime.ForTime > new TimeSpan(1, 30, 0) || predictionsForTime.ForTime - Data.CurrentTime > new TimeSpan(1, 30, 0)) continue;
 
 				var curPrice = CurrencyProvider.FindPriceByTime(predictionsForTime.ForTime, Data.Account.CurrencyName);
 				if (curPrice <= 0) continue;

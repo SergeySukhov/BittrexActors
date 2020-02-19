@@ -10,7 +10,7 @@ namespace BittrexCore.Models
         public Guid Guid;
         public DateTime ForTime;
         public decimal OldPrice;
-        public readonly Dictionary<string, double> RulePredictions;
+        public Dictionary<string, double> RulePredictions;
 
         public Prediction()
         {
