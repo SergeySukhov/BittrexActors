@@ -1,4 +1,5 @@
 ﻿using BittrexData;
+using RulesLibrary;
 using System;
 using System.Collections.Generic;
 using System.Linq;

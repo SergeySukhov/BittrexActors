@@ -35,7 +35,7 @@ namespace BittrexCore.Models
 			CurrencyPrice = provider.FindPriceByTime(transactionTime, account.CurrencyName);
 			if (CurrencyPrice <= 0)
 			{
-				this.TransactionResult = TransactionResult.Failed;
+				this.TransactionResult = TransactionResult.Failed; // TODO: Логгер
 				return;
 			} 
 			if (operationType == OperationType.Buy)

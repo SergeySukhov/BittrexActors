@@ -22,7 +22,7 @@ namespace BittrexData.Contexts
 		{
 			base.OnModelCreating(modelBuilder);
 
-			modelBuilder.Entity<Account>().Property(x => x.BtcCount).HasColumnType("decimal(16,8)");
+			modelBuilder.Entity<AccountDto>().Property(x => x.BtcCount).HasColumnType("decimal(16,8)");
 			
 		}
 				

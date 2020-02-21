@@ -5,7 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using BittrexCore.Models;
+using BittrexData;
 using BittrexData.Interfaces;
+using RulesLibrary;
 
 namespace BittrexCore
 {
@@ -19,16 +21,41 @@ namespace BittrexCore
 			this.actorProvider = actorProvider;
 		}
 
-		public Actor CreateActor(ICurrencyProvider currencyProvider, RulesLibrary.RuleLibrary ruleLibrary)
+		public Actor CreateActor(ICurrencyProvider currencyProvider, IRuleLibrary ruleLibrary, string currencyName, string[] rulesForBuy, string[] rulesForSell, ActorType actorType)
 		{
 			var actor = new Actor(currencyProvider, ruleLibrary);
 
-			// ...
+			actor.Data.CurrentTime = new DateTime(2017, 6, 1, 1, 1, 1);
+
+			var xx = actor.Data.CurrentTime.Date.ToString();
+
+			actor.Data.Account.BtcCount = 0.001m;
+			actor.Data.Account.CurrencyName = currencyName; // "ETH";
+			actor.Data.Account.CurrencyCount = 0m;
+
+			actor.Data.ActorType = actorType; // ActorType.HalfDaily;
+			actor.Data.ChangeCoefficient = 0.01;
+			actor.Data.HesitationToSell = 0.5;
+			actor.Data.HesitationToBuy = 0.5;
+			actor.Data.IsAlive = true;
+			actor.Data.LastActionTime = actor.Data.CurrentTime - new TimeSpan(6, 1, 0);
+
+			foreach(var rule in rulesForBuy)
+			{
+				actor.Data.Rules.Add(new BalancedRule(rule, OperationType.Buy) { Guid = Guid.NewGuid(), Coefficient = 0.5 });
+			}
+
+			foreach (var rule in rulesForSell)
+			{
+				actor.Data.Rules.Add(new BalancedRule(rule, OperationType.Sell) { Guid = Guid.NewGuid(), Coefficient = 0.4 });
+			}
+			
+			actor.Data.Generation = -1;
 
 			return actor;
 		}
 
-		public async Task<List<Actor>> LoadAliveActors(ICurrencyProvider currencyProvider, RulesLibrary.RuleLibrary ruleLibrary)
+		public async Task<List<Actor>> LoadAliveActors(ICurrencyProvider currencyProvider, IRuleLibrary ruleLibrary)
 		{
 			var aliveActors = new List<Actor>();
 
@@ -50,30 +77,30 @@ namespace BittrexCore
 			await actorProvider.SaveOrUpdateActor(dtoData);
 		}
 
-		private ActorData DbActorToModel(BittrexData.Models.ActorData actorData)
+		private ActorData DbActorToModel(BittrexData.Models.ActorDataDto actorData)
 		{
 			var config = new MapperConfiguration(cfg =>
 			{
 				cfg.AllowNullDestinationValues = true;
 				cfg.AllowNullCollections = true;
 
-				cfg.CreateMap<BittrexData.Models.ActorData, ActorData>()
+				cfg.CreateMap<BittrexData.Models.ActorDataDto, ActorData>()
 				.ForMember(x => x.Account, x => x.MapFrom(m => m.Account))
 				.ForMember(x => x.Transactions, x => x.MapFrom(m => m.Transactions))
 				.ForMember(x => x.Predictions, x => x.MapFrom(m => m.Predictions))
 				.ForMember(x => x.Rules, x => x.MapFrom(m => m.Rules));
 
-				cfg.CreateMap<BittrexData.Models.Account, Account>();
+				cfg.CreateMap<BittrexData.Models.AccountDto, Account>();
 
-				cfg.CreateMap<BittrexData.Models.Transaction, Transaction>();
+				cfg.CreateMap<BittrexData.Models.TransactionDto, Transaction>();
 
-				cfg.CreateMap<BittrexData.Models.BalancedRule, BalancedRule>()
+				cfg.CreateMap<BittrexData.Models.BalancedRuleDto, BalancedRule>()
 					.ConstructUsing(x => new BalancedRule(x.RuleName, x.Type));
 
-				cfg.CreateMap<BittrexData.Models.Prediction, Prediction>()
+				cfg.CreateMap<BittrexData.Models.PredictionDto, Prediction>()
 					.ForMember(x => x.RulePredictions, x => x.MapFrom(m => m.RulePredictions));
 
-				cfg.CreateMap<BittrexData.Models.PredictionUnit, KeyValuePair<string, double>>()
+				cfg.CreateMap<BittrexData.Models.PredictionUnitDto, KeyValuePair<string, double>>()
 					.ConstructUsing(x => new KeyValuePair<string, double>(x.RuleName, x.Coefficient));
 
 			});
@@ -85,11 +112,11 @@ namespace BittrexCore
 			return data;
 		}
 
-		private BittrexData.Models.ActorData ActorToDbModel(ActorData actorData)
+		private BittrexData.Models.ActorDataDto ActorToDbModel(ActorData actorData)
 		{
 			var config = new MapperConfiguration(cfg =>
 			{
-				cfg.CreateMap<ActorData, BittrexData.Models.ActorData>()
+				cfg.CreateMap<ActorData, BittrexData.Models.ActorDataDto>()
 				.ForMember(x => x.Account, x => x.MapFrom(m => m.Account))
 				.ForMember(x => x.Transactions, x => x.MapFrom(m => m.Transactions))
 				.ForMember(x => x.Predictions, x => x.MapFrom(m => m.Predictions))
@@ -104,13 +131,13 @@ namespace BittrexCore
 
 									});
 
-				cfg.CreateMap<Account, BittrexData.Models.Account>();
+				cfg.CreateMap<Account, BittrexData.Models.AccountDto>();
 
-				cfg.CreateMap<Transaction, BittrexData.Models.Transaction>();
+				cfg.CreateMap<Transaction, BittrexData.Models.TransactionDto>();
 
-				cfg.CreateMap<BalancedRule, BittrexData.Models.BalancedRule>();
+				cfg.CreateMap<BalancedRule, BittrexData.Models.BalancedRuleDto>();
 
-				cfg.CreateMap<Prediction, BittrexData.Models.Prediction>()
+				cfg.CreateMap<Prediction, BittrexData.Models.PredictionDto>()
 					.ForMember(x => x.RulePredictions, x => x.MapFrom(m => m.RulePredictions))
 					.AfterMap((src, dest) =>
 						{
@@ -121,7 +148,7 @@ namespace BittrexCore
 							}
 						});
 
-				cfg.CreateMap<KeyValuePair<string, double>, BittrexData.Models.PredictionUnit>()
+				cfg.CreateMap<KeyValuePair<string, double>, BittrexData.Models.PredictionUnitDto>()
 					.ForMember(x => x.RuleName, x => x.MapFrom(m => m.Key))
 					.ForMember(x => x.Coefficient, x => x.MapFrom(m => m.Value))
 					.ForMember(x => x.Guid, x => x.MapFrom(m => Guid.NewGuid()));
@@ -130,7 +157,7 @@ namespace BittrexCore
 
 			var mapper = new Mapper(config);
 
-			var dataDto = mapper.Map<BittrexData.Models.ActorData>(actorData);
+			var dataDto = mapper.Map<BittrexData.Models.ActorDataDto>(actorData);
 			return dataDto;
 		}
 	}

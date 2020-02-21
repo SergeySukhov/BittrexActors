@@ -6,15 +6,16 @@ using BittrexData.Interfaces;
 
 namespace RulesLibrary
 {
-    public class RuleLibrary
-    {
+    public class RuleLibrary12Hour: IRuleLibrary
+	{
+		
 
-        public delegate double Rule(ICurrencyProvider provider, DateTime currentTime);
 
-        public readonly Dictionary<string, Rule> RulesSellDictionary = new Dictionary<string, Rule>();
-        public readonly Dictionary<string, Rule> RulesBuyDictionary = new Dictionary<string, Rule>();
+        public Dictionary<string, Rule> RulesSellDictionary { get; } = new Dictionary<string, Rule>();
+        public Dictionary<string, Rule> RulesBuyDictionary { get; } = new Dictionary<string, Rule>();
 
-        public RuleLibrary()
+
+        public RuleLibrary12Hour()
         {
             RulesBuyDictionary.Add("rule0", rule0);
             RulesBuyDictionary.Add("rule1", rule1);

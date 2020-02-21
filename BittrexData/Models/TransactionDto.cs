@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BittrexData.Models
 {
-    public class Prediction
+    public class TransactionDto
     {
 		[Key]
         public Guid Guid { get; set; }
@@ -16,14 +16,21 @@ namespace BittrexData.Models
 		public Guid ActorDataGuid { get; set; }
 
 		[Required]
-        public DateTime ForTime { get; set; }
+        public OperationType Type { get; set; }
 
 		[Required]
-		public decimal OldPrice { get; set; }
+        public DateTime Time { get; set; }
 
-		public virtual ActorData ActorData { get; set; }
+		[Required]
+		public decimal CurrencyPrice { get; set; }
 
-        public virtual ICollection<PredictionUnit> RulePredictions { get; set; }
+		[Required]
+		public decimal BtcCount { get; set; }
+
+		[Required]
+		public TransactionResult TransactionResult { get; set; }
+
+        public virtual ActorDataDto ActorData { get; set; }
 
     }
 }

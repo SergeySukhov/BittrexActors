@@ -9,8 +9,8 @@ namespace BittrexData.Interfaces
 {
     public interface IActorProvider
     {
-        Task<List<ActorData>> LoadAliveActors();
+        Task<List<ActorDataDto>> LoadAliveActors();
 
-        Task SaveOrUpdateActor(ActorData actorData);
+        Task SaveOrUpdateActor(ActorDataDto actorData);
     }
 }

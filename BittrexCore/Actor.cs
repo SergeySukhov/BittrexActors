@@ -15,9 +15,9 @@ namespace BittrexCore
         public ActorData Data;
         public readonly ICurrencyProvider CurrencyProvider;
 
-        public readonly RuleLibrary RuleLibrary;
+        public readonly IRuleLibrary RuleLibrary;
 
-        public Actor(ICurrencyProvider currencyProvider, RuleLibrary ruleLibrary)
+        public Actor(ICurrencyProvider currencyProvider, IRuleLibrary ruleLibrary)
         {
             Guid = Guid.NewGuid();
             Data = new ActorData();

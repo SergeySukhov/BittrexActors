@@ -6,7 +6,7 @@ using System.Text;
 
 namespace BittrexData.Models
 {
-	public class PredictionUnit
+	public class PredictionUnitDto
 	{
 		[Key]
 		public Guid Guid { get; set; }
@@ -20,7 +20,7 @@ namespace BittrexData.Models
 		[Required]
 		public double Coefficient { get; set; }
 
-        public virtual Prediction Prediction { get; set; }
+        public virtual PredictionDto Prediction { get; set; }
 
     }
 }

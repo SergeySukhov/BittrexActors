@@ -6,7 +6,7 @@ using System.Text;
 
 namespace BittrexData.Models
 {
-	public class ActorData
+	public class ActorDataDto
 	{
 		[Key]
 		public Guid Guid { get; set; }
@@ -35,10 +35,10 @@ namespace BittrexData.Models
 		[Required]
 		public ActorType ActorType { get; set; }
 
-        public virtual Account Account { get; set; }
+        public virtual AccountDto Account { get; set; }
 
-		public virtual ICollection<BalancedRule> Rules { get; set; }
-		public virtual ICollection<Prediction> Predictions { get; set; }
-		public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
+		public virtual ICollection<BalancedRuleDto> Rules { get; set; }
+		public virtual ICollection<PredictionDto> Predictions { get; set; }
+		public virtual ICollection<TransactionDto> Transactions { get; set; } = new List<TransactionDto>();
 	}
 }

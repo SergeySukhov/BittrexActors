@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
+
 
 namespace BittrexData.Models
 {
-	public class BalancedRule
+	public class BalancedRuleDto
 	{
 		[Key]
 		public Guid Guid { get; set; }
@@ -24,7 +22,7 @@ namespace BittrexData.Models
         [Required]
         public OperationType Type { get; set; }
 
-        public virtual ActorData ActorData { get; set; }
+        public virtual ActorDataDto ActorData { get; set; }
 
     }
 }

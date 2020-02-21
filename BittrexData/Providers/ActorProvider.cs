@@ -12,7 +12,7 @@ namespace BittrexData.Providers
     public class ActorProvider : IActorProvider
     {
 		
-		public async Task SaveOrUpdateActor(ActorData actorData)
+		public async Task SaveOrUpdateActor(ActorDataDto actorData)
 		{
 			var context = new BittrexActorsDbContext();
 
@@ -46,7 +46,7 @@ namespace BittrexData.Providers
 
 		} 
 
-		public async Task<List<ActorData>> LoadAliveActors()
+		public async Task<List<ActorDataDto>> LoadAliveActors()
 		{
 			var context = new BittrexActorsDbContext();
 

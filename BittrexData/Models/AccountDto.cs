@@ -7,7 +7,7 @@ using System.Text;
 
 namespace BittrexData.Models
 {
-    public class Account
+    public class AccountDto
     {
 		[Key]
 		public Guid Guid { get; set; }
@@ -24,6 +24,6 @@ namespace BittrexData.Models
 		[Required]
 		public decimal CurrencyCount { get; set; }
 
-        public virtual ActorData ActorData { get; set; }
+        public virtual ActorDataDto ActorData { get; set; }
 	}
 }
