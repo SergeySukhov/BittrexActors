@@ -20,6 +20,7 @@ namespace BittrexCore.Models
         public BalancedRule(string ruleName, OperationType operationType)
         {
             Guid = Guid.NewGuid();
+			Coefficient = 0.5;
 
             RuleName = ruleName;
             Type = operationType;

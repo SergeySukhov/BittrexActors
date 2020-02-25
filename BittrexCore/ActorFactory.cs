@@ -21,36 +21,41 @@ namespace BittrexCore
 			this.actorProvider = actorProvider;
 		}
 
-		public Actor CreateActor(ICurrencyProvider currencyProvider, IRuleLibrary ruleLibrary, string currencyName, string[] rulesForBuy, string[] rulesForSell, ActorType actorType)
+		public Actor CreateActor(ICurrencyProvider currencyProvider, IRuleLibrary ruleLibrary, ActorType actorType, string currencyName, string[] rulesForBuy, string[] rulesForSell)
 		{
 			var actor = new Actor(currencyProvider, ruleLibrary);
 
 			actor.Data.CurrentTime = new DateTime(2017, 6, 1, 1, 1, 1);
 
-			var xx = actor.Data.CurrentTime.Date.ToString();
-
 			actor.Data.Account.BtcCount = 0.001m;
-			actor.Data.Account.CurrencyName = currencyName; // "ETH";
+			actor.Data.Account.CurrencyName = currencyName;
 			actor.Data.Account.CurrencyCount = 0m;
 
-			actor.Data.ActorType = actorType; // ActorType.HalfDaily;
+			actor.Data.ActorType = actorType;
 			actor.Data.ChangeCoefficient = 0.01;
 			actor.Data.HesitationToSell = 0.5;
 			actor.Data.HesitationToBuy = 0.5;
 			actor.Data.IsAlive = true;
-			actor.Data.LastActionTime = actor.Data.CurrentTime - new TimeSpan(6, 1, 0);
+			actor.Data.LastActionTime = new DateTime(2000, 1, 1);
+			actor.Data.Generation = -1;
 
-			foreach(var rule in rulesForBuy)
+			// TODO: доп  проверки
+
+			if (rulesForBuy == null && rulesForSell == null)
 			{
-				actor.Data.Rules.Add(new BalancedRule(rule, OperationType.Buy) { Guid = Guid.NewGuid(), Coefficient = 0.5 });
+				rulesForBuy = ruleLibrary.RulesBuyDictionary.Select(x => x.Key).ToArray();
+				rulesForSell = ruleLibrary.RulesSellDictionary.Select(x => x.Key).ToArray();
+			}
+			 
+			foreach (var rule in rulesForBuy) 
+			{
+				actor.Data.Rules.Add(new BalancedRule(rule, OperationType.Buy));
 			}
 
 			foreach (var rule in rulesForSell)
 			{
 				actor.Data.Rules.Add(new BalancedRule(rule, OperationType.Sell) { Guid = Guid.NewGuid(), Coefficient = 0.4 });
 			}
-			
-			actor.Data.Generation = -1;
 
 			return actor;
 		}

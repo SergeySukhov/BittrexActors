@@ -1,4 +1,5 @@
 ﻿using BittrexData.Interfaces;
+using RulesLibrary;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,18 +54,38 @@ namespace BittrexCore
 			});
 
 			AllActorProcesses.Add(task);
+			task.Start();
 		}
 
 		public void SpawnGeneration()
 		{
+			Console.WriteLine($"!! Spawn generation: {LastGeneration}");
+
 			if (LastGeneration == 0)
 			{
-				Console.WriteLine("!! Spawn first generation");
+				var actor = ActorFactory.CreateActor(CurrencyProvider, new RuleLibrary12Hour(), BittrexData.ActorType.HalfDaily, "ETH", null, null);
+				AllActors.Add(actor);
+				RunActor(actor);
+			} else
+			{
+				
+				foreach(var oldActor in AllActors)
+				{
+					var rulesAboveAverage = oldActor.Data.Rules.Where(x => x.Coefficient > 0.6);
+					if (rulesAboveAverage != null && rulesAboveAverage.Count() > 0)
+					{
+						var actorNewGen = ActorFactory.CreateActor(CurrencyProvider, new RuleLibrary12Hour(),
+							BittrexData.ActorType.HalfDaily, oldActor.Data.Account.CurrencyName,
+							rulesAboveAverage.Where(x => x.Type == BittrexData.OperationType.Buy).Select(x => x.RuleName).ToArray(),
+							rulesAboveAverage.Where(x => x.Type == BittrexData.OperationType.Sell).Select(x => x.RuleName).ToArray());
 
-
-
-				return;
+						AllActors.Add(actorNewGen);
+						RunActor(actorNewGen);
+					}
+				}
 			}
+
+			LastGeneration++;
 		}
 
 		public void InspectGeneration()
