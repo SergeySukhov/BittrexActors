@@ -29,9 +29,9 @@ namespace BittrexCore
 		{
 			// TODO: вынести
 			if (!Data.IsAlive ||
-				Data.CurrentTime - Data.LastActionTime > new TimeSpan(24, 0, 0) && Data.ActorType == ActorType.Daily ||
-				Data.CurrentTime - Data.LastActionTime > new TimeSpan(12, 0, 0) && Data.ActorType == ActorType.HalfDaily ||
-				Data.CurrentTime - Data.LastActionTime > new TimeSpan(24 * 7, 0, 0) && Data.ActorType == ActorType.Weekly)
+				Data.CurrentTime - Data.LastActionTime < new TimeSpan(24, 0, 0) && Data.ActorType == ActorType.Daily ||
+				Data.CurrentTime - Data.LastActionTime < new TimeSpan(12, 0, 0) && Data.ActorType == ActorType.HalfDaily ||
+				Data.CurrentTime - Data.LastActionTime < new TimeSpan(24 * 7, 0, 0) && Data.ActorType == ActorType.Weekly)
 				return;
 
 			Data.LastActionTime = Data.CurrentTime;

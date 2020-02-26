@@ -25,7 +25,7 @@ namespace BittrexCore
 		{
 			var actor = new Actor(currencyProvider, ruleLibrary);
 
-			actor.Data.CurrentTime = new DateTime(2017, 6, 1, 1, 1, 1);
+			actor.Data.CurrentTime = Const.StartActorTime;
 
 			actor.Data.Account.BtcCount = 0.001m;
 			actor.Data.Account.CurrencyName = currencyName;
@@ -40,8 +40,7 @@ namespace BittrexCore
 			actor.Data.Generation = -1;
 
 			// TODO: доп  проверки
-
-			if (rulesForBuy == null && rulesForSell == null)
+			if (rulesForBuy == null && rulesForSell == null || rulesForBuy.Length == 0 && rulesForSell.Length == 0)
 			{
 				rulesForBuy = ruleLibrary.RulesBuyDictionary.Select(x => x.Key).ToArray();
 				rulesForSell = ruleLibrary.RulesSellDictionary.Select(x => x.Key).ToArray();

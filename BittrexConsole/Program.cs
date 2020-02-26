@@ -20,14 +20,14 @@ namespace BittrexConsole
 			IRuleLibrary r = new RuleLibrary12Hour();
 
 			var dataManager = new DataManager();
-
-
-			
-
+					   
 			var factory = new ActorFactory(dataManager.ActorProvider);
-						
 
-			Console.WriteLine("Finished!!");
+			var actorManager = new ActorManager();
+
+			actorManager.Initiate(dataManager.CurrencyProvider, dataManager.ActorProvider);
+
+			// Console.WriteLine("Finished!!");
 			Console.ReadKey();
 		}
     }
