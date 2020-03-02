@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.1000
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BittrexConsole", "BittrexConsole\BittrexConsole.csproj", "{6DF45A7F-EEB1-45C9-A777-81A7A44D2C49}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BittrexCore", "BittrexCore\BittrexCore.csproj", "{4EE4DE21-FCDE-469C-87A3-5D56058C5A99}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BittrexData", "BittrexData\BittrexData.csproj", "{DAC1BFA7-1F73-4404-8FD2-B49B4E412692}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RulesLibrary", "RulesLibrary\RulesLibrary.csproj", "{5668669F-538E-40E2-80C8-C3B0246E5101}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6DF45A7F-EEB1-45C9-A777-81A7A44D2C49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DF45A7F-EEB1-45C9-A777-81A7A44D2C49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DF45A7F-EEB1-45C9-A777-81A7A44D2C49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DF45A7F-EEB1-45C9-A777-81A7A44D2C49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4EE4DE21-FCDE-469C-87A3-5D56058C5A99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EE4DE21-FCDE-469C-87A3-5D56058C5A99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4EE4DE21-FCDE-469C-87A3-5D56058C5A99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4EE4DE21-FCDE-469C-87A3-5D56058C5A99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAC1BFA7-1F73-4404-8FD2-B49B4E412692}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAC1BFA7-1F73-4404-8FD2-B49B4E412692}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAC1BFA7-1F73-4404-8FD2-B49B4E412692}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAC1BFA7-1F73-4404-8FD2-B49B4E412692}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5668669F-538E-40E2-80C8-C3B0246E5101}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5668669F-538E-40E2-80C8-C3B0246E5101}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5668669F-538E-40E2-80C8-C3B0246E5101}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5668669F-538E-40E2-80C8-C3B0246E5101}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {58BA0087-4255-4337-B017-513A60C7C1E0}
+	EndGlobalSection
+EndGlobal
