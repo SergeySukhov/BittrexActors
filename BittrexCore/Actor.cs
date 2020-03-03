@@ -39,21 +39,21 @@ namespace BittrexCore
 			if (Data.HesitationToBuy < ShouldBuy())
 			{
 				CommitOperation(OperationType.Buy);
-				Data.HesitationToBuy *= 1.1;
+				Data.HesitationToBuy *= 1.1; // !!
 			}
 			else
 			{
-				Data.HesitationToBuy *= 0.9;
+				Data.HesitationToBuy *= 0.9; // !!
 			}
 
 			if (Data.HesitationToBuy < ShouldSell())
 			{
 				CommitOperation(OperationType.Sell);
-				Data.HesitationToSell *= 1.1;
+				Data.HesitationToSell *= 1.1; // !!
 			}
 			else
 			{
-				Data.HesitationToSell *= 0.9;
+				Data.HesitationToSell *= 0.9; // !!
 			}
 
 			Inspect();
@@ -93,8 +93,8 @@ namespace BittrexCore
             prediction.OldPrice = CurrencyProvider.FindPriceByTime(Data.CurrentTime, Data.Account.CurrencyName) + Const.TransactionSumBtcCommision; // цена + процент за проведение транзакции
 			if (prediction.OldPrice <= 0) return 0;
 
-			if (Data.ActorType == ActorType.HalfDaily) prediction.ForTime += new TimeSpan(6, 0, 0);
-            else if (Data.ActorType == ActorType.Daily) prediction.ForTime += new TimeSpan(12, 0, 0);
+			if (Data.ActorType == ActorType.HalfDaily) prediction.ForTime += new TimeSpan(12, 0, 0);
+            else if (Data.ActorType == ActorType.Daily) prediction.ForTime += new TimeSpan(24, 0, 0);
             else if (Data.ActorType == ActorType.Weekly) prediction.ForTime += new TimeSpan(7, 0, 0, 0);
 
 

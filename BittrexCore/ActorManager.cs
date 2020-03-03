@@ -39,7 +39,7 @@ namespace BittrexCore
 
 				while (AllActors.Count > 0)
 				{
-					if (LastGeneration > 1 && AllActors.Count < 2 || AllActors.Any(x => x.Data.IsAlive && x.Data.Generation == LastGeneration && x.Data.CurrentTime - Const.StartActorTime > Const.NewGenerationSpawnDelay))
+					if (LastGeneration > 1 && AllActors.Count < 2 || AllActors.Any(x => x.Data.Generation == LastGeneration && x.Data.CurrentTime - Const.StartActorTime > Const.NewGenerationSpawnDelay))
 					{
 						var oldActorsCount = AllActors.Count;
 						SpawnGeneration();
@@ -72,7 +72,7 @@ namespace BittrexCore
 					if (i % 30 == 0) Console.WriteLine(actor.GetInfo());
 					actor.Data.CurrentTime += new TimeSpan(1, 0, 0); // в обучающей модели
 
-					Thread.Sleep(500);
+					//Thread.Sleep(100);
 					i++;
 
 					await ActorFactory.SaveActor(actor);
@@ -86,32 +86,40 @@ namespace BittrexCore
 
 		public void SpawnGeneration()
 		{
-			Console.WriteLine($"!! Spawn generation: {LastGeneration}");
+            LastGeneration++;
 
-			if (LastGeneration == 0)
+            Console.WriteLine($"!! Spawn generation: {LastGeneration}");
+
+			if (LastGeneration == 1)
 			{
 				var actor = ActorFactory.CreateActor(CurrencyProvider, new RuleLibrary12Hour(), BittrexData.ActorType.HalfDaily, "ETH", null, null);
+                actor.Data.Generation = LastGeneration;
+
 				RunActor(actor);
 			} else
 			{
-				
+                var newActors = new List<Actor>();
+
 				foreach(var oldActor in AllActors)
 				{
-					var rulesAboveAverage = oldActor.Data.Rules.Where(x => x.Coefficient > 0.6);
+					var rulesAboveAverage = oldActor.Data.Rules.Where(x => x.Coefficient > 0.1);
 					if (rulesAboveAverage != null && rulesAboveAverage.Count() > 0)
 					{
 						var actorNewGen = ActorFactory.CreateActor(CurrencyProvider, new RuleLibrary12Hour(),
 							BittrexData.ActorType.HalfDaily, oldActor.Data.Account.CurrencyName,
 							rulesAboveAverage.Where(x => x.Type == BittrexData.OperationType.Buy).Select(x => x.RuleName).ToArray(),
 							rulesAboveAverage.Where(x => x.Type == BittrexData.OperationType.Sell).Select(x => x.RuleName).ToArray());
+                        actorNewGen.Data.Generation = LastGeneration;
 
-						RunActor(actorNewGen);
+                        newActors.Add(actorNewGen);
 					}
 				}
-			}
 
-			LastGeneration++;
-		}
+                foreach (var s in newActors) RunActor(s);
+
+            }
+
+        }
 
 		public void InspectGeneration()
 		{
