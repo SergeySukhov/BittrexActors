@@ -13,14 +13,17 @@ namespace BittrexCore
     {
 		public readonly List<Actor> AllActors = new List<Actor>();
 		public readonly List<Task> AllActorProcesses = new List<Task>();
-
+        public Task ManagerTask;
 		public ActorFactory ActorFactory;
 
 		private bool IsInitiated = false;
 		private ICurrencyProvider CurrencyProvider;
 		private IActorProvider ActorProvider;
 
-		private int LastGeneration = 0;
+        private CancellationTokenSource managerMainCancelTokenSource = new CancellationTokenSource();
+        private CancellationTokenSource actorsCancelTokenSource = new CancellationTokenSource();
+
+        private int LastGeneration = 0;
 
 		public void Initiate(ICurrencyProvider currencyProvider, IActorProvider actorProvider)
 		{
@@ -33,25 +36,40 @@ namespace BittrexCore
 			Console.WriteLine("!!Spawn first generation...");
 			// Проверки систем
 			// запуск акторов
-			SpawnGeneration();
+			SpawnGeneration(); // нулевое поколение
 
-			Task.Run(() => {
 
-				while (AllActors.Count > 0)
-				{
-					if (LastGeneration > 1 && AllActors.Count < 2 || AllActors.Any(x => x.Data.Generation == LastGeneration && x.Data.CurrentTime - Const.StartActorTime > Const.NewGenerationSpawnDelay))
-					{
-						var oldActorsCount = AllActors.Count;
-						SpawnGeneration();
-						Console.WriteLine($"!! New generation spawned; Added actors: {AllActors.Count - oldActorsCount}");
-												
-					}
-				}
-				Console.WriteLine("!! All actors are dead");
-			});
-		}
+            this.ManagerTask = new Task(() =>
+            {
+                Console.WriteLine("!! Actor manger main task started");
+                while (true)
+                {
+                    if (this.managerMainCancelTokenSource.IsCancellationRequested) return;
 
-		public void RunActor(Actor actor)
+                    AllActors.RemoveAll(x => !x.Data.IsAlive);
+
+                    if (AllActors.Count == 0) break;
+
+                    if (LastGeneration > 0 && AllActors.Any(x => x.Data.Generation == LastGeneration && x.Data.CurrentTime - Const.StartActorTime > Const.NewGenerationSpawnDelay))
+                    {
+                        var oldActorsCount = AllActors.Count;
+                        SpawnGeneration();
+                        Console.WriteLine($"!! New generation spawned; Added actors: {AllActors.Count - oldActorsCount}");
+
+                    }
+
+                    //Thread.Sleep(1000);
+                }
+                Console.WriteLine("!! All actors are dead");
+            });
+
+            this.ManagerTask.Start();
+
+            this.IsInitiated = true;
+
+        }
+
+        public void RunActor(Actor actor)
 		{
 				
 			if (!AllActors.Any(x => x.Guid == actor.Guid)) AllActors.Add(actor);
@@ -61,10 +79,12 @@ namespace BittrexCore
 				int i = 0;
 				while (actor.Data.IsAlive)
 				{
+                    if (this.actorsCancelTokenSource.IsCancellationRequested) return;
 					try
 					{
 						actor.DoWork();
-					} catch (Exception ex)
+					}
+                    catch (Exception ex)
 					{
 						Console.WriteLine("!! error" + ex.Message);
 					}
@@ -86,11 +106,10 @@ namespace BittrexCore
 
 		public void SpawnGeneration()
 		{
-            LastGeneration++;
 
             Console.WriteLine($"!! Spawn generation: {LastGeneration}");
 
-			if (LastGeneration == 1)
+			if (LastGeneration == 0)
 			{
 				var actor = ActorFactory.CreateActor(CurrencyProvider, new RuleLibrary12Hour(), BittrexData.ActorType.HalfDaily, "ETH", null, null);
                 actor.Data.Generation = LastGeneration;
@@ -102,6 +121,7 @@ namespace BittrexCore
 
 				foreach(var oldActor in AllActors)
 				{
+                    // TODO: проверки, вынос констант
 					var rulesAboveAverage = oldActor.Data.Rules.Where(x => x.Coefficient > 0.1);
 					if (rulesAboveAverage != null && rulesAboveAverage.Count() > 0)
 					{
@@ -118,13 +138,31 @@ namespace BittrexCore
                 foreach (var s in newActors) RunActor(s);
 
             }
+            LastGeneration++;
 
         }
 
-		public void InspectGeneration()
+        public void InspectGeneration()
 		{
 
 		}
 
+
+        public async void ClearOldActorsData()
+        {
+            Console.WriteLine("!! Начало очистки базы данных акторов...");
+
+            this.actorsCancelTokenSource.Cancel();
+            this.managerMainCancelTokenSource.Cancel();
+
+            this.ManagerTask.Wait();
+            Task.WaitAll(AllActorProcesses.ToArray(), 2000);
+
+            Console.WriteLine("!! Процесcы остановлены");
+
+            await this.ActorProvider.ClearOldData();
+
+            Console.WriteLine("!! Данные удалены");
+        }
     }
 }

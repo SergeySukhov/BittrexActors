@@ -61,5 +61,18 @@ namespace BittrexData.Providers
 
 			return aliveActors;
 		}
+
+        public async Task ClearOldData()
+        {
+            var context = new BittrexActorsDbContext();
+            var actors = context.ActorDatas.Where(actor => actor.Guid.ToString() != "")
+            .ToList();
+
+            if (actors != null) 
+            context.ActorDatas.RemoveRange(actors);
+
+            await context.SaveChangesAsync();
+            await context.DisposeAsync();
+        }
 	}
 }

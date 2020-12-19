@@ -69,6 +69,8 @@ namespace BittrexCore
 			var price = CurrencyProvider.FindPriceByTime(Data.CurrentTime, Data.Account.CurrencyName);
 			var estimatePrice = Data.Account.BtcCount + Data.Account.CurrencyCount * price;
 
+            if (price == -1) estimatePrice = -1000;
+
 			return $"Актер: {Data.Guid}" + Environment.NewLine +
 					$"Счет: {Data.Account.BtcCount}BTC" + Environment.NewLine +
 					$"Счет валюты: {Data.Account.CurrencyCount}{Data.Account.CurrencyName}" + Environment.NewLine +
@@ -79,7 +81,7 @@ namespace BittrexCore
 					$"Тип: {Data.ActorType}" + Environment.NewLine +
 					$"Количество предсказаний: {Data.Predictions.Count}" + Environment.NewLine +
 					$"Количество транзакций: {Data.Transactions.Count}" + Environment.NewLine +
-					$"Оценочное состояние: {estimatePrice}" + Environment.NewLine;
+					$"Оценочное состояние: " + (estimatePrice == -1000 ? "нет данных" : estimatePrice.ToString()) + Environment.NewLine;
 		}
 
         private double ShouldBuy()
@@ -200,7 +202,7 @@ namespace BittrexCore
 
         }
 
-        ////////////////////////// вспомогательные функции
+        #region вспомогательные функции
 
         private double Exponenta01(double x)
 		{
@@ -218,5 +220,7 @@ namespace BittrexCore
 
 			return Const.RuleChangeCoef * predictionValue * ExponentaMinus11(currentCoefValue);
 		}
-	}
+
+        #endregion
+    }
 }

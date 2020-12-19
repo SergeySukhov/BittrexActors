@@ -12,5 +12,7 @@ namespace BittrexData.Interfaces
         Task<List<ActorDataDto>> LoadAliveActors();
 
         Task SaveOrUpdateActor(ActorDataDto actorData);
+
+        Task ClearOldData();
     }
 }

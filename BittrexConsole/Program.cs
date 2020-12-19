@@ -27,6 +27,24 @@ namespace BittrexConsole
 
 			actorManager.Initiate(dataManager.CurrencyProvider, dataManager.ActorProvider);
 
+
+            while (true)
+            {
+                var command = Console.ReadLine();
+
+                if (command == "clear")
+                {
+                    actorManager.ClearOldActorsData();
+                    break;
+                }
+
+                if (command == "restart")
+                {
+                    actorManager.ClearOldActorsData();
+                    actorManager = new ActorManager();
+                    actorManager.Initiate(dataManager.CurrencyProvider, dataManager.ActorProvider);
+                }
+            }
 			// Console.WriteLine("Finished!!");
 			Console.ReadKey();
 		}
